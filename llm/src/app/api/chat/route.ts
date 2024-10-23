@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
   const model = new ChatVertexAI({
     model: "gemini-1.5-flash",
-    maxOutputTokens: 75,
+    maxOutputTokens: 50,
     safetySettings: [
       {
         category: "HARM_CATEGORY_UNSPECIFIED",
