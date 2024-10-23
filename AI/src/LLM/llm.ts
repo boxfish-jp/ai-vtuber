@@ -1,87 +1,45 @@
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { StringOutputParser } from "@langchain/core/output_parsers";
-import {
-	ChatPromptTemplate,
-	FewShotChatMessagePromptTemplate,
-} from "@langchain/core/prompts";
-import { ChatVertexAI } from "@langchain/google-vertexai";
-import AIConfig from "../../AIConfig.json";
-import { sleep } from "../sleep";
-
-process.env.GOOGLE_APPLICATION_CREDENTIALS = "./key.json";
+import endpoint from "../../../endpoint.json";
 
 export type chatHistoryType = { human: string; ai: string }[];
 
 const createMessages = (
-	chatHistory: chatHistoryType,
-): (HumanMessage | AIMessage)[] => {
-	if (chatHistory.length <= 1) {
-		return [];
-	}
-	const onlyHistory = chatHistory.slice(0, -1);
-	const messages: (HumanMessage | AIMessage)[] = [];
-	for (const chat of onlyHistory) {
-		if (chat.human) {
-			messages.push(new HumanMessage(chat.human));
-		}
-		if (chat.ai) {
-			messages.push(new AIMessage(chat.ai));
-		}
-	}
-	return messages;
+  chatHistory: chatHistoryType
+): { role: string; content: string }[] => {
+  const messages: { role: string; content: string }[] = [];
+  for (const chat of chatHistory) {
+    if (chat.human) {
+      messages.push({ role: "user", content: chat.human });
+    }
+    if (chat.ai) {
+      messages.push({ role: "assistant", content: chat.ai });
+    }
+  }
+  return messages;
 };
 
-const createInput = (chatHistory: chatHistoryType): string => {
-	if (chatHistory.length === 0) {
-		throw new Error("chatHistory is empty");
-	}
-	return chatHistory[chatHistory.length - 1].human;
+const parseResponse = (response: string): string => {
+  const texts = response.split("\n");
+  let parsedText = "";
+  for (const text of texts) {
+    parsedText += text.substring(3, text.length - 1);
+  }
+  return parsedText.replace(/\n+/g, "").replace(/\\n+/g, " ");
 };
 
 export const think = async (chatHistory: chatHistoryType): Promise<string> => {
-	const messages = createMessages(chatHistory);
-	const input = createInput(chatHistory);
-	const examplePrompt = ChatPromptTemplate.fromMessages([
-		["human", "{input}"],
-		["ai", "{output}"],
-	]);
-	const examples = AIConfig.prompt.prompt.example;
-	const fewShotPrompt = new FewShotChatMessagePromptTemplate({
-		examplePrompt: examplePrompt,
-		examples: examples,
-		inputVariables: [],
-	});
-	const fewShotPromptInvoke = await fewShotPrompt.invoke({});
-	const prompt = ChatPromptTemplate.fromMessages([
-		["system", AIConfig.prompt.prompt.systemPrompt],
-		["placeholder", "{chat_history}"],
-		ChatPromptTemplate.fromMessages(fewShotPromptInvoke.toChatMessages()),
-		["human", "{input}"],
-	]);
-
-	const model = new ChatVertexAI({
-		model: AIConfig.prompt.model.modelName,
-		maxOutputTokens: AIConfig.prompt.model.maxOutputTokens,
-		safetySettings: [
-			{
-				category: "HARM_CATEGORY_UNSPECIFIED",
-				threshold: "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
-			},
-		],
-	});
-	const parser = new StringOutputParser();
-	const chain = prompt.pipe(model).pipe(parser);
-	for (let i = 0; i < AIConfig.prompt.model.maxRetries; i++) {
-		try {
-			const response = await chain.invoke({
-				chat_history: messages,
-				input: input,
-			});
-			return response;
-		} catch (e) {
-			console.log("error:", e);
-			await sleep(1000);
-		}
-	}
-	return "思考が停止しました";
+  const messages = createMessages(chatHistory);
+  try {
+    console.log(`${endpoint.LLM.url}/api/chat`);
+    const response = await fetch(`${endpoint.LLM.url}/api/chat`, {
+      method: "POST",
+      body: JSON.stringify({ messages }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.text();
+    return parseResponse(data);
+  } catch (error) {
+    throw new Error(`Failed to fetch LLM: ${String(error)}`);
+  }
 };
