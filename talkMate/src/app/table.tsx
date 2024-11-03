@@ -1,114 +1,114 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
-import { Chat } from ".prisma/client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import type { Chat } from ".prisma/client";
 
 const formSchema = z.object({
-  chatId: z.string(),
+	chatId: z.string(),
 });
 
 export const ChatTable = ({
-  chats,
-  submitCallback,
+	chats,
+	submitCallback,
 }: {
-  chats: Chat[];
-  submitCallback: (chatId: string) => Promise<void>;
+	chats: Chat[];
+	submitCallback: (chatId: string) => Promise<void>;
 }) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-  });
+	const form = useForm<z.infer<typeof formSchema>>({
+		resolver: zodResolver(formSchema),
+	});
 
-  const listEndRef = useRef<HTMLTableRowElement>(null);
-  useEffect(() => {
-    listEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chats]);
+	const listEndRef = useRef<HTMLTableRowElement>(null);
+	useEffect(() => {
+		listEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [chats]);
 
-  const { toast } = useToast();
+	const { toast } = useToast();
 
-  const onsubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-    await submitCallback(data.chatId);
-  };
+	const onsubmit = async (data: z.infer<typeof formSchema>) => {
+		console.log(data);
+		await submitCallback(data.chatId);
+	};
 
-  return (
-    <>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onsubmit)}
-          className="flex flex-col gap-6 items-center"
-        >
-          <div className="self-start mx-0 w-full">
-            <FormField
-              control={form.control}
-              name="chatId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value?.toString()}
-                    >
-                      <ScrollArea className=" h-[80vh]">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="w-10">選択</TableHead>
-                              <TableHead className="w-16">id</TableHead>
-                              <TableHead className="w-16">who</TableHead>
-                              <TableHead>内容</TableHead>
-                            </TableRow>
-                          </TableHeader>
+	return (
+		<>
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit(onsubmit)}
+					className="flex flex-col gap-6 items-center"
+				>
+					<div className="self-start mx-0 w-full">
+						<FormField
+							control={form.control}
+							name="chatId"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<RadioGroup
+											onValueChange={field.onChange}
+											defaultValue={field.value?.toString()}
+										>
+											<ScrollArea className=" h-[80vh]">
+												<Table>
+													<TableHeader>
+														<TableRow>
+															<TableHead className="w-10">選択</TableHead>
+															<TableHead className="w-16">id</TableHead>
+															<TableHead className="w-16">who</TableHead>
+															<TableHead>内容</TableHead>
+														</TableRow>
+													</TableHeader>
 
-                          <TableBody>
-                            {chats.map((chat) => (
-                              <TableRow key={chat.id.toString()}>
-                                <TableCell>
-                                  <RadioGroupItem value={chat.id.toString()} />
-                                </TableCell>
-                                <TableCell>{chat.id}</TableCell>
-                                <TableCell>{chat.who}</TableCell>
-                                <TableCell>{chat.message}</TableCell>
-                              </TableRow>
-                            ))}
-                            <TableRow ref={listEndRef} />
-                          </TableBody>
-                        </Table>
-                      </ScrollArea>
-                    </RadioGroup>
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-          <Button
-            type="submit"
-            className="w-fit"
-            onClick={() => {
-              toast({
-                title: "AIに送信しました",
-              });
-            }}
-          >
-            送信
-          </Button>
-        </form>
-      </Form>
-      <Toaster />
-    </>
-  );
+													<TableBody>
+														{chats.map((chat) => (
+															<TableRow key={chat.id.toString()}>
+																<TableCell>
+																	<RadioGroupItem value={chat.id.toString()} />
+																</TableCell>
+																<TableCell>{chat.id}</TableCell>
+																<TableCell>{chat.who}</TableCell>
+																<TableCell>{chat.message}</TableCell>
+															</TableRow>
+														))}
+														<TableRow ref={listEndRef} />
+													</TableBody>
+												</Table>
+											</ScrollArea>
+										</RadioGroup>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+					</div>
+					<Button
+						type="submit"
+						className="w-fit"
+						onClick={() => {
+							toast({
+								title: "AIに送信しました",
+							});
+						}}
+					>
+						送信
+					</Button>
+				</form>
+			</Form>
+			<Toaster />
+		</>
+	);
 };

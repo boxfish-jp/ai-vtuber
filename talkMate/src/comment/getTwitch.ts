@@ -2,16 +2,16 @@ import tmi from "tmi.js";
 import { createChat } from "../message/opeMess";
 
 export const getTwtich = (channelId: string) => {
-  const client = new tmi.Client({
-    channels: [channelId],
-  });
+	const client = new tmi.Client({
+		channels: [channelId],
+	});
 
-  client.connect();
+	client.connect();
 
-  client.on("message", (channel, tags, message, self) => {
-    if (self) return;
+	client.on("message", (channel, tags, message, self) => {
+		if (self) return;
 
-    console.log("twitch:", message);
-    createChat("viewer", message);
-  });
+		console.log("twitch:", message);
+		createChat("viewer", message);
+	});
 };
