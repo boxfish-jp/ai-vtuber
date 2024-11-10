@@ -17,9 +17,11 @@ import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type { Chat } from ".prisma/client";
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
 	chatId: z.string(),
+	needScreenshot: z.boolean(),
 });
 
 export const ChatTable = ({
@@ -27,7 +29,7 @@ export const ChatTable = ({
 	submitCallback,
 }: {
 	chats: Chat[];
-	submitCallback: (chatId: string) => Promise<void>;
+	submitCallback: (chatId: string, needScreenshot: boolean) => Promise<void>;
 }) => {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -41,8 +43,8 @@ export const ChatTable = ({
 	const { toast } = useToast();
 
 	const onsubmit = async (data: z.infer<typeof formSchema>) => {
-		console.log(data);
-		await submitCallback(data.chatId);
+		await submitCallback(data.chatId, data.needScreenshot);
+		form.setValue("needScreenshot", false);
 	};
 
 	return (
@@ -95,9 +97,29 @@ export const ChatTable = ({
 							)}
 						/>
 					</div>
+					<div className="flex items-center gap-6">
+						<div className="flex items-center gap-2">
+							<FormField
+								control={form.control}
+								name="needScreenshot"
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<Switch
+												checked={field.value}
+												onCheckedChange={field.onChange}
+											/>
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+							<p>スクショ</p>
+						</div>
+					</div>
 					<Button
 						type="submit"
-						className="w-fit"
+						className="w-48"
+						size={"lg"}
 						onClick={() => {
 							toast({
 								title: "AIに送信しました",

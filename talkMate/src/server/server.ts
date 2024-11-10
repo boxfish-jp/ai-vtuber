@@ -11,10 +11,11 @@ export const startServer = () => {
 
 	app.get("/", async (c) => {
 		const chatId = Number(c.req.query("id"));
+		const needScreenshot = Boolean(c.req.query("screenshot"));
 		if (!chatId) {
 			return c.text("chatId is required", 400);
 		}
-		const response = await sendAPI(chatId);
+		const response = await sendAPI(chatId, needScreenshot);
 		await createChat("ai", response);
 		return c.text(response);
 	});

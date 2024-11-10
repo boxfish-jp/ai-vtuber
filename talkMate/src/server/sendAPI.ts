@@ -1,18 +1,18 @@
+import { takeScreenshot } from "@/lib/screenshot";
 import { AiEndpoint } from "../endpoint";
 import { getChatHistory } from "../message/opeMess";
 
-export const sendAPI = async (chatId: number) => {
-	const chatHistory = await getChatHistory(chatId);
-	if (!chatHistory) {
-		return "No chatHistory found";
-	}
+export const sendAPI = async (chatId: number, needScreenshot: boolean) => {
+	const requestBody = await makeRequestBody(chatId, needScreenshot);
+	console.log(requestBody);
 	const params = {
 		headers: {
 			"Content-Type": "application/json",
 		},
 		method: "POST",
-		body: JSON.stringify({ data: chatHistory }),
+		body: requestBody,
 	};
+
 	try {
 		const response = await fetch(AiEndpoint, params);
 		if (!response.ok) {
@@ -24,4 +24,23 @@ export const sendAPI = async (chatId: number) => {
 		console.log(e);
 		return String(e);
 	}
+};
+
+const makeRequestBody = async (
+	chatId: number,
+	needScreenshot: boolean,
+): Promise<string> => {
+	const chatHistory = await getChatHistory(chatId);
+	if (!chatHistory) {
+		return "No chatHistory found";
+	}
+
+	if (needScreenshot) {
+		const imageUrl = await takeScreenshot(); // Add screenshot to chatHistory
+		return JSON.stringify({
+			data: chatHistory,
+			imageUrl: imageUrl,
+		});
+	}
+	return JSON.stringify({ data: chatHistory });
 };
