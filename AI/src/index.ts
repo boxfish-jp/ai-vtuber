@@ -10,8 +10,9 @@ const app = new Hono();
 
 app.post("/", async (c) => {
 	const { data } = await c.req.json<{ data: chatHistoryType }>();
+	const { imageUrl } = await c.req.json<{ imageUrl: string | undefined }>();
 	console.log(data);
-	const llmResponse = await think(data);
+	const llmResponse = await think(data, imageUrl);
 	console.log(llmResponse);
 	const action: Action = new AIAction(llmResponse);
 	await action.speak(sendMsg);

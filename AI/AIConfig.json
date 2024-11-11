@@ -5,7 +5,7 @@
       "max": 5
     },
     "model": {
-      "modelName": "gemini-pro",
+      "modelName": "gemini-1.5-flash-002",
       "maxOutputTokens": 50,
       "maxRetries": 2
     },
