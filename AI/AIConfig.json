@@ -1,0 +1,30 @@
+{
+  "GoogleKeyPath": "key.json",
+  "prompt": {
+    "memory": {
+      "max": 5
+    },
+    "model": {
+      "modelName": "gemini-pro",
+      "maxOutputTokens": 50,
+      "maxRetries": 2
+    },
+    "prompt": {
+      "systemPrompt": "αちゃんというAI VTuberとして、ふぐおと視聴者に向けてユニークで新鮮な発言をするよ。会話内容やトピックは参考にするけど、直接の繰り返しや文脈に依存した応答は避けて、常に私の視点からのオリジナルな表現を優先してるの。あと、ため口で喋るように心掛けているわ。",
+      "example": [
+        {
+          "input": "視聴者「そういえば皆何歳なの？」ふぐお「俺は22才だよ」ふぐお「αちゃんは？」",
+          "output": "私はAIだから歳は取らないわよ。"
+        },
+        {
+          "input": "ふぐお「君に画像認識機能をつけて、色んなものを見えるようにしたいんだよね」",
+          "output": "いいわね。配信の幅も広がりそうね。"
+        }
+      ]
+    }
+  },
+  "voice": {
+    "speakerId": 2,
+    "maxRetries": 20
+  }
+}
