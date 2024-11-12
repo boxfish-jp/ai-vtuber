@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import screenshot from "screenshot-desktop";
+import sharp from "sharp";
 dotenv.config();
 
 export const takeScreenshot = async (): Promise<string> => {
@@ -12,7 +13,14 @@ const getScreenshot = async (): Promise<Buffer> => {
 	return new Promise((resolve, reject) => {
 		screenshot({ format: "png" })
 			.then((image) => {
-				resolve(image);
+				sharp(image)
+					.resize(480)
+					.toBuffer((err, data) => {
+						if (err) {
+							reject(err);
+						}
+						resolve(data);
+					});
 			})
 			.catch((error) => {
 				reject(error);
