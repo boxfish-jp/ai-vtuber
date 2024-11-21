@@ -59,7 +59,7 @@ export const think = async (
 	const inputPrompt = imageUrl
 		? new HumanMessage({
 				content: [
-					{ type: "text", text: "{input}" },
+					{ type: "text", text: input },
 					{
 						type: "image_url",
 						image_url: {
@@ -69,7 +69,7 @@ export const think = async (
 				],
 			})
 		: new HumanMessage({
-				content: [{ type: "text", text: "{input}" }],
+				content: [{ type: "text", text: input }],
 			});
 	const fewShotPromptInvoke = await fewShotPrompt.invoke({});
 	const prompt = ChatPromptTemplate.fromMessages([
