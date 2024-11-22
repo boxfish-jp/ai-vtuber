@@ -4,14 +4,14 @@ import {
 	ChatPromptTemplate,
 	FewShotChatMessagePromptTemplate,
 } from "@langchain/core/prompts";
-import { ChatVertexAI } from "@langchain/google-vertexai";
+import { LlamaCpp } from "@langchain/community/llms/llama_cpp";
 import AIConfig from "../../AIConfig.json";
-import fs from "node:fs/promises";
 import { sleep } from "../sleep";
 
-process.env.GOOGLE_APPLICATION_CREDENTIALS = "./key.json";
-
 export type chatHistoryType = { human: string; ai: string }[];
+const model = await LlamaCpp.initialize({
+	modelPath: "./models/gemma-2-2b-jpn-it-Q8_0.gguf",
+});
 
 const createMessages = (
 	chatHistory: chatHistoryType,
@@ -79,16 +79,6 @@ export const think = async (
 		inputPrompt,
 	]);
 
-	const model = new ChatVertexAI({
-		model: AIConfig.prompt.model.modelName,
-		maxOutputTokens: AIConfig.prompt.model.maxOutputTokens,
-		safetySettings: [
-			{
-				category: "HARM_CATEGORY_UNSPECIFIED",
-				threshold: "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
-			},
-		],
-	});
 	const parser = new StringOutputParser();
 	const chain = prompt.pipe(model).pipe(parser);
 	for (let i = 0; i < AIConfig.prompt.model.maxRetries; i++) {

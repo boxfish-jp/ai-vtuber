@@ -31,3 +31,5 @@ lerna-debug.log*
 
 **key.json
 *.wav
+
+models/
