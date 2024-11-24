@@ -1,15 +1,18 @@
+import { config } from "dotenv";
+config();
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import {
 	ChatPromptTemplate,
 	FewShotChatMessagePromptTemplate,
 } from "@langchain/core/prompts";
+import { ChatVertexAI } from "@langchain/google-vertexai-web";
 import { LlamaCpp } from "@langchain/community/llms/llama_cpp";
 import AIConfig from "../../AIConfig.json";
 import { sleep } from "../sleep";
 
 export type chatHistoryType = { human: string; ai: string }[];
-const model = await LlamaCpp.initialize({
+const localModel = await LlamaCpp.initialize({
 	modelPath: "./models/gemma-2-2b-jpn-it-Q8_0.gguf",
 });
 
@@ -55,6 +58,7 @@ export const think = async (
 		examples: examples,
 		inputVariables: [],
 	});
+	const fewShotPromptInvoke = await fewShotPrompt.invoke({});
 
 	const inputPrompt = imageUrl
 		? new HumanMessage({
@@ -71,21 +75,32 @@ export const think = async (
 		: new HumanMessage({
 				content: [{ type: "text", text: input }],
 			});
-	const fewShotPromptInvoke = await fewShotPrompt.invoke({});
 	const prompt = ChatPromptTemplate.fromMessages([
 		["system", AIConfig.prompt.prompt.systemPrompt],
 		["placeholder", "{chat_history}"],
 		ChatPromptTemplate.fromMessages(fewShotPromptInvoke.toChatMessages()),
 		inputPrompt,
 	]);
+	process.env.GOOGLE_WEB_CREDENTIALS = process.env.GOOGLE_CREDENTIALS;
+	const gemini = new ChatVertexAI({
+		model: "gemini-1.5-flash",
+		maxOutputTokens: 50,
+		safetySettings: [
+			{
+				category: "HARM_CATEGORY_UNSPECIFIED",
+				threshold: "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+			},
+		],
+	});
 
 	const parser = new StringOutputParser();
-	const chain = prompt.pipe(model).pipe(parser);
+	const chain = imageUrl
+		? prompt.pipe(gemini).pipe(parser)
+		: prompt.pipe(localModel).pipe(parser);
 	for (let i = 0; i < AIConfig.prompt.model.maxRetries; i++) {
 		try {
 			const response = await chain.invoke({
 				chat_history: messages,
-				input: input,
 			});
 			return response;
 		} catch (e) {
