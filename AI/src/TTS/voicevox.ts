@@ -62,6 +62,7 @@ export class voiceVoxAudio implements Audio {
 	}
 
 	async saveAudio(audioData: ArrayBuffer): Promise<void> {
+		const __dirname = path.resolve(path.dirname(""));
 		const fileName = path.join(__dirname, `./${new Date().getTime()}.wav`);
 		try {
 			const buffer = Buffer.from(audioData);
