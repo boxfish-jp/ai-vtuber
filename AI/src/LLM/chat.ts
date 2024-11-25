@@ -6,15 +6,11 @@ import {
 	ChatPromptTemplate,
 	FewShotChatMessagePromptTemplate,
 } from "@langchain/core/prompts";
-import { ChatVertexAI } from "@langchain/google-vertexai-web";
-import { LlamaCpp } from "@langchain/community/llms/llama_cpp";
+import { localModel, gemini } from "./model";
 import AIConfig from "../../AIConfig.json";
 import { sleep } from "../sleep";
 
 export type chatHistoryType = { human: string; ai: string }[];
-const localModel = await LlamaCpp.initialize({
-	modelPath: "./models/gemma-2-2b-jpn-it-Q8_0.gguf",
-});
 
 const createMessages = (
 	chatHistory: chatHistoryType,
@@ -42,7 +38,7 @@ const createInput = (chatHistory: chatHistoryType): string => {
 	return chatHistory[chatHistory.length - 1].human;
 };
 
-export const think = async (
+export const chat = async (
 	chatHistory: chatHistoryType,
 	imageUrl: string | undefined,
 ): Promise<string> => {
@@ -81,17 +77,6 @@ export const think = async (
 		ChatPromptTemplate.fromMessages(fewShotPromptInvoke.toChatMessages()),
 		inputPrompt,
 	]);
-	process.env.GOOGLE_WEB_CREDENTIALS = process.env.GOOGLE_CREDENTIALS;
-	const gemini = new ChatVertexAI({
-		model: "gemini-1.5-flash",
-		maxOutputTokens: 50,
-		safetySettings: [
-			{
-				category: "HARM_CATEGORY_UNSPECIFIED",
-				threshold: "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
-			},
-		],
-	});
 
 	const parser = new StringOutputParser();
 	const chain = imageUrl

@@ -3,7 +3,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { Server } from "socket.io"; // Import the 'Socket' type
 import endpoint from "../../endpoint.json";
-import { type chatHistoryType, think } from "./LLM/llm";
+import { type chatHistoryType, chat } from "./LLM/chat";
 import { AIAction, type Action } from "./action";
 
 const app = new Hono();
@@ -12,7 +12,7 @@ app.post("/", async (c) => {
 	const { data } = await c.req.json<{ data: chatHistoryType }>();
 	const { imageUrl } = await c.req.json<{ imageUrl: string | undefined }>();
 	console.log(data);
-	const llmResponse = await think(data, imageUrl);
+	const llmResponse = await chat(data, imageUrl);
 	console.log(llmResponse);
 	const action: Action = new AIAction(llmResponse);
 	await action.speak(sendMsg);
