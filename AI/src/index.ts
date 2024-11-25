@@ -5,6 +5,7 @@ import { Server } from "socket.io"; // Import the 'Socket' type
 import endpoint from "../../endpoint.json";
 import { type chatHistoryType, chat } from "./LLM/chat";
 import { AIAction, type Action } from "./action";
+import { beginTalk } from "./LLM/speakTo";
 
 const app = new Hono();
 
@@ -13,6 +14,15 @@ app.post("/", async (c) => {
 	const { imageUrl } = await c.req.json<{ imageUrl: string | undefined }>();
 	console.log(data);
 	const llmResponse = await chat(data, imageUrl);
+	console.log(llmResponse);
+	const action: Action = new AIAction(llmResponse);
+	await action.speak(sendMsg);
+	sendMsg(" ");
+	return c.text(llmResponse);
+});
+
+app.post("/beginTalk/", async (c) => {
+	const llmResponse = await beginTalk();
 	console.log(llmResponse);
 	const action: Action = new AIAction(llmResponse);
 	await action.speak(sendMsg);
