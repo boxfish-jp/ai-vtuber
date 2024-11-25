@@ -31,31 +31,14 @@ const createMessages = (
 	return messages;
 };
 
-const createInput = (chatHistory: chatHistoryType): string => {
+const createInputPrompt = (
+	chatHistory: chatHistoryType,
+	imageUrl: string | undefined,
+) => {
 	if (chatHistory.length === 0) {
 		throw new Error("chatHistory is empty");
 	}
-	return chatHistory[chatHistory.length - 1].human;
-};
-
-export const chat = async (
-	chatHistory: chatHistoryType,
-	imageUrl: string | undefined,
-): Promise<string> => {
-	const messages = createMessages(chatHistory);
-	const input = createInput(chatHistory);
-	const examplePrompt = ChatPromptTemplate.fromMessages([
-		["human", "{input}"],
-		["ai", "{output}"],
-	]);
-	const examples = AIConfig.prompt.prompt.example;
-	const fewShotPrompt = new FewShotChatMessagePromptTemplate({
-		examplePrompt: examplePrompt,
-		examples: examples,
-		inputVariables: [],
-	});
-	const fewShotPromptInvoke = await fewShotPrompt.invoke({});
-
+	const input = chatHistory[chatHistory.length - 1].human;
 	const inputPrompt = imageUrl
 		? new HumanMessage({
 				content: [
@@ -71,10 +54,40 @@ export const chat = async (
 		: new HumanMessage({
 				content: [{ type: "text", text: input }],
 			});
+	return inputPrompt;
+};
+
+const createExamplePrompt = async () => {
+	const examplePromptTemplate = ChatPromptTemplate.fromMessages([
+		["human", "{input}"],
+		["ai", "{output}"],
+	]);
+	const examples = AIConfig.prompt.prompt.example;
+	const fewShotPrompt = new FewShotChatMessagePromptTemplate({
+		examplePrompt: examplePromptTemplate,
+		examples: examples,
+		inputVariables: [],
+	});
+	const fewShotPromptInvoke = await fewShotPrompt.invoke({});
+
+	const examplePrompt = ChatPromptTemplate.fromMessages(
+		fewShotPromptInvoke.toChatMessages(),
+	);
+	return examplePrompt;
+};
+
+export const chat = async (
+	chatHistory: chatHistoryType,
+	imageUrl: string | undefined,
+): Promise<string> => {
+	const messages = createMessages(chatHistory);
+	const inputPrompt = createInputPrompt(chatHistory, imageUrl);
+	const examplePrompt = await createExamplePrompt();
+
 	const prompt = ChatPromptTemplate.fromMessages([
 		["system", AIConfig.prompt.prompt.systemPrompt],
-		["placeholder", "{chat_history}"],
-		ChatPromptTemplate.fromMessages(fewShotPromptInvoke.toChatMessages()),
+		["placeholder", "{messages}"],
+		examplePrompt,
 		inputPrompt,
 	]);
 
@@ -85,7 +98,7 @@ export const chat = async (
 	for (let i = 0; i < AIConfig.prompt.model.maxRetries; i++) {
 		try {
 			const response = await chain.invoke({
-				chat_history: messages,
+				messages: messages,
 			});
 			return response;
 		} catch (e) {
