@@ -102,6 +102,9 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
+      '@types/dom-speech-recognition':
+        specifier: ^0.0.4
+        version: 0.0.4
       '@types/node':
         specifier: ^20.11.17
         version: 20.17.6
@@ -1147,6 +1150,9 @@ packages:
 
   '@types/cors@2.8.17':
     resolution: {integrity: sha512-8CGDvrBj1zgo2qE+oS3pOCyYNqCPryMWY2bGfwA0dcfopWGgxs+78df0Rs3rc9THP4JkOhLsAa+15VdpAqkcUA==}
+
+  '@types/dom-speech-recognition@0.0.4':
+    resolution: {integrity: sha512-zf2GwV/G6TdaLwpLDcGTIkHnXf8JEf/viMux+khqKQKDa8/8BAUtXXZS563GnvJ4Fg0PBLGAaFf2GekEVSZ6GQ==}
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -2832,6 +2838,8 @@ snapshots:
   '@types/cors@2.8.17':
     dependencies:
       '@types/node': 20.17.6
+
+  '@types/dom-speech-recognition@0.0.4': {}
 
   '@types/estree@1.0.6': {}
 
