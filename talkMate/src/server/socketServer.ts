@@ -2,15 +2,19 @@ import type { Server as HttpServer } from "node:http";
 import type { ServerType } from "@hono/node-server";
 import type { DefaultEventsMap } from "node_modules/socket.io/dist/typed-events";
 import { Server } from "socket.io";
+import { createChat } from "../message/opeMess";
 
 interface SocketServerType {
 	broadcast: (message: string) => void;
 }
 
 class SocketIoServer implements SocketServerType {
-	private io:
-		| Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
-		| undefined;
+	private io: Server<
+		DefaultEventsMap,
+		DefaultEventsMap,
+		DefaultEventsMap,
+		unknown
+	>;
 
 	constructor(server: ServerType) {
 		this.io = new Server(server as HttpServer, {
@@ -21,6 +25,14 @@ class SocketIoServer implements SocketServerType {
 				methods: ["GET", "POST"],
 			},
 		});
+
+		this.io.on("connection", (socket) => {
+			socket.on("result", (msg) => {
+				console.log(`fuguo: ${msg}`);
+				createChat("fuguo", msg);
+			});
+		});
+		console.log("init");
 	}
 
 	broadcast(message: string): void {
