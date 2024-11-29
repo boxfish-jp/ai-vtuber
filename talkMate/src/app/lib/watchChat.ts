@@ -3,9 +3,7 @@ import type { DefaultEventsMap } from "node_modules/socket.io/dist/typed-events"
 import { type Socket, io } from "socket.io-client";
 import type { Chat } from ".prisma/client";
 
-export type WatchChat = {};
-
-export class watchChatFromSocket implements WatchChat {
+export class watchChatFromSocket {
 	private _chats: Chat[] = [];
 	private _socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
@@ -18,7 +16,7 @@ export class watchChatFromSocket implements WatchChat {
 
 		this._socket.on("message", (event: string) => {
 			const chat = JSON.parse(event) as Chat[];
-			const newChats = this.pushChats(chat);
+			this.pushChats(chat);
 			console.log(chat);
 			Callback(this.chats);
 		});
