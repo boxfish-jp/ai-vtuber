@@ -21,5 +21,9 @@ export const beginTalk = async () => {
 };
 
 const getTalkTheme = (): string => {
-	return "ふぐおに今何をしているかを聞いてください。";
+	const rand = Math.floor(Math.random() * 10) + 1;
+	if (rand <= 2) {
+		return "ふぐおに今何をしているかを聞いてください。";
+	}
+	return "ふぐおに何か話題を振ってください。";
 };

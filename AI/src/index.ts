@@ -6,8 +6,11 @@ import endpoint from "../../endpoint.json";
 import { type chatHistoryType, chat } from "./LLM/chat";
 import { AIAction, type Action } from "./action";
 import { beginTalk } from "./LLM/speakTo";
+import { fuguoState, type fuguoStateDataType } from "./LLM/talk/fuguo";
+import { trigger } from "./trigger";
 
 const app = new Hono();
+trigger();
 
 app.post("/", async (c) => {
 	const { data } = await c.req.json<{ data: chatHistoryType }>();
@@ -21,6 +24,12 @@ app.post("/", async (c) => {
 	return c.text(llmResponse);
 });
 
+app.post("/fuguo/", async (c) => {
+	const { data } = await c.req.json<{ data: fuguoStateDataType }>();
+	fuguoState.talking = data.talking;
+	return c.text("ok");
+});
+
 app.post("/beginTalk/", async (c) => {
 	const llmResponse = await beginTalk();
 	console.log(llmResponse);
@@ -30,7 +39,7 @@ app.post("/beginTalk/", async (c) => {
 	return c.text(llmResponse);
 });
 
-const sendMsg = (msg: string) => {
+export const sendMsg = (msg: string) => {
 	ioServer.emit("message", msg);
 };
 
