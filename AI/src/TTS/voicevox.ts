@@ -4,7 +4,7 @@ import path from "node:path";
 import iconv from "iconv-lite";
 import endpoint from "../../../endpoint.json";
 import AIConfig from "../../AIConfig.json";
-import { sleep } from "../sleep";
+import { sleep } from "../lib/sleep";
 
 export interface Audio {
 	create(): Promise<void>;

@@ -8,7 +8,7 @@ import {
 } from "@langchain/core/prompts";
 import { localModel, gemini } from "./model";
 import AIConfig from "../../AIConfig.json";
-import { sleep } from "../sleep";
+import { sleep } from "../lib/sleep";
 
 export type chatHistoryType = { human: string; ai: string }[];
 

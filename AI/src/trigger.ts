@@ -1,6 +1,6 @@
 import { beginTalk } from "./LLM/speakTo";
 import { fuguoState } from "./LLM/state/fuguo";
-import { sleep } from "./sleep";
+import { sleep } from "./lib/sleep";
 import { AIAction, type Action } from "./action";
 import { sendMsg } from "./index";
 

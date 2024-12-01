@@ -1,5 +1,5 @@
 import { type Audio, voiceVoxAudio } from "./TTS/voicevox";
-import { sleep } from "./sleep";
+import { sleep } from "./lib/sleep";
 
 export interface Action {
 	speak(callback?: (msg: string) => void): Promise<void>;
