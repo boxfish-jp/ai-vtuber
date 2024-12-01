@@ -8,7 +8,6 @@ import type { chatHistoryType } from "./type/chatHistoryType";
 import { AIAction, type Action } from "./action";
 import { beginTalk } from "./LLM/speakTo";
 import { fuguoState } from "./LLM/state/fuguo";
-import type { talkStateDataType } from "./LLM/state/talk";
 import { trigger } from "./trigger";
 import { aiState } from "./LLM/state/ai";
 
@@ -30,8 +29,8 @@ app.post("/", async (c) => {
 });
 
 app.post("/fuguo/", async (c) => {
-	const { data } = await c.req.json<{ data: talkStateDataType }>();
-	fuguoState.talking = data.talking;
+	const talking = c.req.query("talking") === "true";
+	fuguoState.talking = talking;
 	return c.text("ok");
 });
 
