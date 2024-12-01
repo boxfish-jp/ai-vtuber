@@ -3,16 +3,20 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { Server } from "socket.io"; // Import the 'Socket' type
 import endpoint from "../../endpoint.json";
-import { type chatHistoryType, chat } from "./LLM/chat";
+import { chat } from "./LLM/chat";
+import type { chatHistoryType } from "./type/chatHistoryType";
 import { AIAction, type Action } from "./action";
 import { beginTalk } from "./LLM/speakTo";
-import { fuguoState, type fuguoStateDataType } from "./LLM/state/fuguo";
+import { fuguoState } from "./LLM/state/fuguo";
+import type { talkStateDataType } from "./LLM/state/talk";
 import { trigger } from "./trigger";
+import { aiState } from "./LLM/state/ai";
 
 const app = new Hono();
 trigger();
 
 app.post("/", async (c) => {
+	aiState.talking = true;
 	const { data } = await c.req.json<{ data: chatHistoryType }>();
 	const { imageUrl } = await c.req.json<{ imageUrl: string | undefined }>();
 	console.log(data);
@@ -21,21 +25,24 @@ app.post("/", async (c) => {
 	const action: Action = new AIAction(llmResponse);
 	await action.speak(sendMsg);
 	sendMsg(" ");
+	aiState.talking = false;
 	return c.text(llmResponse);
 });
 
 app.post("/fuguo/", async (c) => {
-	const { data } = await c.req.json<{ data: fuguoStateDataType }>();
+	const { data } = await c.req.json<{ data: talkStateDataType }>();
 	fuguoState.talking = data.talking;
 	return c.text("ok");
 });
 
 app.post("/beginTalk/", async (c) => {
+	aiState.talking = true;
 	const llmResponse = await beginTalk();
 	console.log(llmResponse);
 	const action: Action = new AIAction(llmResponse);
 	await action.speak(sendMsg);
 	sendMsg(" ");
+	aiState.talking = false;
 	return c.text(llmResponse);
 });
 
