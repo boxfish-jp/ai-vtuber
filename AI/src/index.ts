@@ -6,7 +6,7 @@ import endpoint from "../../endpoint.json";
 import { type chatHistoryType, chat } from "./LLM/chat";
 import { AIAction, type Action } from "./action";
 import { beginTalk } from "./LLM/speakTo";
-import { fuguoState, type fuguoStateDataType } from "./LLM/talk/fuguo";
+import { fuguoState, type fuguoStateDataType } from "./LLM/state/fuguo";
 import { trigger } from "./trigger";
 
 const app = new Hono();
