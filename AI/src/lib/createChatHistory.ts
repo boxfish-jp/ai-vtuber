@@ -19,7 +19,6 @@ export const createChatHistory = async (
 		method: "POST",
 		body: requestBody,
 	};
-	console.log(params);
 	try {
 		const response = await fetch(url, params);
 		if (!response.ok) {

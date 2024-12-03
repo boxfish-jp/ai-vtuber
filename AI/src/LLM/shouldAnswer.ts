@@ -27,7 +27,6 @@ export const getShouldAnswer = async (
 			const response = await chain.invoke({
 				messages: messages,
 			});
-			console.log("response:", response);
 			const firstNumber = findFirstNumber(response);
 			return firstNumber === 1;
 		} catch (e) {
