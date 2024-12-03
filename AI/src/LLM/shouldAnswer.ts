@@ -6,15 +6,17 @@ import { getlocalModel } from "./model";
 import { createMessages } from "./util/createMessages";
 import { createExamplePrompt } from "./util/createExamplePrompt";
 import { sleep } from "../lib/sleep";
+import { readFileContent } from "../../prompt/readFileContent";
 
 export const getShouldAnswer = async (
 	chatHistory: chatHistoryType,
 ): Promise<boolean> => {
 	const messages = createMessages(chatHistory);
+	const systemPrompt = await readFileContent("./prompt/shouldAnswer/system.md");
 	const examplePrompt = await createExamplePrompt("shouldAnswer");
 
 	const prompt = ChatPromptTemplate.fromMessages([
-		["system", AIConfig.prompt.shouldAnswer.systemPrompt],
+		["system", systemPrompt],
 		["placeholder", "{messages}"],
 		examplePrompt,
 	]);

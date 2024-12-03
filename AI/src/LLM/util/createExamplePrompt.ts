@@ -2,7 +2,8 @@ import {
 	ChatPromptTemplate,
 	FewShotChatMessagePromptTemplate,
 } from "@langchain/core/prompts";
-import AIConfig from "../../../AIConfig.json";
+import shouldAnswerPrompt from "../../../prompt/shouldAnswer/example.json";
+import chatPrompt from "../../../prompt/chat/example.json";
 
 export const createExamplePrompt = async (whichExample: string) => {
 	const examplePromptTemplate = ChatPromptTemplate.fromMessages([
@@ -10,9 +11,7 @@ export const createExamplePrompt = async (whichExample: string) => {
 		["ai", "{output}"],
 	]);
 	const examples =
-		whichExample === "shouldAnswer"
-			? AIConfig.prompt.shouldAnswer.example
-			: AIConfig.prompt.prompt.example;
+		whichExample === "shouldAnswer" ? shouldAnswerPrompt : chatPrompt;
 	const fewShotPrompt = new FewShotChatMessagePromptTemplate({
 		examplePrompt: examplePromptTemplate,
 		examples: examples,

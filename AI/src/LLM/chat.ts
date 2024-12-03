@@ -9,6 +9,7 @@ import type { chatHistoryType } from "../type/chatHistoryType";
 import { createMessages } from "./util/createMessages";
 import { createInputPrompt } from "./util/createInputPrompt";
 import { createExamplePrompt } from "./util/createExamplePrompt";
+import { readFileContent } from "../../prompt/readFileContent";
 
 export const chat = async (
 	chatHistory: chatHistoryType,
@@ -16,10 +17,11 @@ export const chat = async (
 ): Promise<string> => {
 	const messages = createMessages(chatHistory);
 	const inputPrompt = createInputPrompt(chatHistory, imageUrl);
+	const systemPrompt = await readFileContent("prompt/chat/system.md");
 	const examplePrompt = await createExamplePrompt("prompt");
 
 	const prompt = ChatPromptTemplate.fromMessages([
-		["system", AIConfig.prompt.prompt.systemPrompt],
+		["system", systemPrompt],
 		["placeholder", "{messages}"],
 		examplePrompt,
 		inputPrompt,
