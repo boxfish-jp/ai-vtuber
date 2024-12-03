@@ -1,6 +1,6 @@
 import type { talkStateDataType } from "./talk";
 
-export class FuguoState implements talkStateDataType {
+export class AiState implements talkStateDataType {
 	private _talking = new Date().getTime();
 
 	get talking() {
@@ -19,4 +19,4 @@ export class FuguoState implements talkStateDataType {
 	}
 }
 
-export const fuguoState: FuguoState = new FuguoState();
+export const aiState: AiState = new AiState();

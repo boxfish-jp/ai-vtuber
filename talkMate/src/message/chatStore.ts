@@ -4,6 +4,7 @@ interface ChatStore {
 	getLatestChat(): Promise<Chat | null>;
 	getLatestClearedChat(): Promise<Chat | null>;
 	getSessionChat(sessionRangeStartId: number): Promise<Chat[]>;
+	getRecentChat(length: number): Promise<Chat[]>;
 	makeAsCleared(chatId: number): Promise<Chat>;
 	createChat(who: string, message: string): Promise<Chat>;
 }
@@ -32,6 +33,15 @@ class PrismaChatStore implements ChatStore {
 		return await this.prisma.chat.findMany({
 			where: { id: { gte: sessionRangeStartId } },
 		});
+	}
+
+	async getRecentChat(length: number): Promise<Chat[]> {
+		return (
+			await this.prisma.chat.findMany({
+				take: length,
+				orderBy: { id: "desc" },
+			})
+		).reverse();
 	}
 
 	async makeAsCleared(chatId: number): Promise<Chat> {

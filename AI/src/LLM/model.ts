@@ -1,7 +1,16 @@
 import { LlamaCpp } from "@langchain/community/llms/llama_cpp";
 import { ChatVertexAI } from "@langchain/google-vertexai-web";
 
-export const localModel = await LlamaCpp.initialize({
+export const getlocalModel = async () => {
+	if (!_localModel) {
+		_localModel = await LlamaCpp.initialize({
+			modelPath: "./models/gemma-2-2b-jpn-it-Q8_0.gguf",
+		});
+	}
+	return _localModel;
+};
+
+let _localModel: LlamaCpp = await LlamaCpp.initialize({
 	modelPath: "./models/gemma-2-2b-jpn-it-Q8_0.gguf",
 });
 

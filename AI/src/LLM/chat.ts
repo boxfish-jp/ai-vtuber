@@ -2,7 +2,7 @@ import { config } from "dotenv";
 config();
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { localModel, gemini } from "./model";
+import { getlocalModel, gemini } from "./model";
 import AIConfig from "../../AIConfig.json";
 import { sleep } from "../lib/sleep";
 import type { chatHistoryType } from "../type/chatHistoryType";
@@ -26,6 +26,7 @@ export const chat = async (
 	]);
 
 	const parser = new StringOutputParser();
+	const localModel = await getlocalModel();
 	const chain = imageUrl
 		? prompt.pipe(gemini).pipe(parser)
 		: prompt.pipe(localModel).pipe(parser);
@@ -34,7 +35,7 @@ export const chat = async (
 			const response = await chain.invoke({
 				messages: messages,
 			});
-			return response;
+			return response.replace(/[\r\n]+/g, "");
 		} catch (e) {
 			console.log("error:", e);
 			await sleep(1000);

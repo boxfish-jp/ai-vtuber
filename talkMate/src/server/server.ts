@@ -2,7 +2,7 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { talkMateEndpoint } from "../endpoint";
-import { createChat } from "../message/opeMess";
+import { createChat, getRecentChatHistory } from "../message/opeMess";
 import { sendAPI } from "./sendAPI";
 import { initSocketServer } from "./socketServer";
 
@@ -19,6 +19,31 @@ export const startServer = () => {
 		await createChat("ai", response);
 		return c.text(response);
 	});
+
+	app.get("/message/", async (c) => {
+		console.log("request to /message/");
+		const len = c.req.query("len");
+		const length = Number(len);
+		if (!len || Number.isNaN(length)) {
+			return c.text("len is required", 400);
+		}
+		const messages = await getRecentChatHistory(length);
+		return c.json(messages);
+	});
+
+	app.post("/message/", async (c) => {
+		const body = (await c.req.json()) as { who: string; message: string };
+		if (
+			!body.who ||
+			!body.message ||
+			(body.who !== "ai" && body.who !== "fuguo" && body.who !== "viewer")
+		) {
+			return c.text("bad param", 400);
+		}
+		await createChat(body.who, body.message);
+		return c.text("ok");
+	});
+
 	app.use(
 		"*",
 		serveStatic({

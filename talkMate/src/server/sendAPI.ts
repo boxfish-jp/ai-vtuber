@@ -1,6 +1,7 @@
 import { takeScreenshot } from "@/lib/screenshot";
 import { AiEndpoint } from "../endpoint";
 import { getChatHistory } from "../message/opeMess";
+import { boolean } from "zod";
 
 export const sendAPI = async (chatId: number, needScreenshot: boolean) => {
 	const requestBody = await makeRequestBody(chatId, needScreenshot);
@@ -24,6 +25,19 @@ export const sendAPI = async (chatId: number, needScreenshot: boolean) => {
 		console.log(e);
 		return String(e);
 	}
+};
+
+export const sendFuguoAPI = async (talking: boolean): Promise<void> => {
+	const url = new URL(`${AiEndpoint}/fuguo/`);
+	url.searchParams.append("talking", talking.toString());
+	try {
+		await fetch(url, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+		});
+	} catch (e) {}
 };
 
 const makeRequestBody = async (

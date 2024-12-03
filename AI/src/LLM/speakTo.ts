@@ -1,7 +1,7 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import AIConfig from "../../AIConfig.json";
-import { localModel } from "./model";
+import { getlocalModel } from "./model";
 
 export const beginTalk = async () => {
 	const talkTheme = getTalkTheme();
@@ -10,6 +10,7 @@ export const beginTalk = async () => {
 		`${systemPrompt}${talkTheme}`,
 	);
 	const parser = new StringOutputParser();
+	const localModel = await getlocalModel();
 	const chain = beginTalkPrompt.pipe(localModel).pipe(parser);
 	try {
 		const response = await chain.invoke({});
