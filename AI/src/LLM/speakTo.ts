@@ -1,11 +1,11 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import AIConfig from "../../AIConfig.json";
+import { readFileContent } from "../../prompt/readFileContent";
 import { getlocalModel } from "./model";
 
 export const beginTalk = async () => {
 	const talkTheme = getTalkTheme();
-	const systemPrompt = AIConfig.prompt.prompt.systemPrompt;
+	const systemPrompt = await readFileContent("prompt/chat/system.md");
 	const beginTalkPrompt = ChatPromptTemplate.fromTemplate(
 		`${systemPrompt}${talkTheme}`,
 	);
