@@ -1,46 +1,15 @@
 import type { chatHistoryType } from "../type/chatHistoryType";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { StringOutputParser } from "@langchain/core/output_parsers";
-import AIConfig from "../../AIConfig.json";
-import { getlocalModel } from "./model";
-import { createMessages } from "./util/createMessages";
-import { createExamplePrompt } from "./util/createExamplePrompt";
-import { sleep } from "../lib/sleep";
-import { readFileContent } from "../../prompt/readFileContent";
 
-export const getShouldAnswer = async (
-	chatHistory: chatHistoryType,
-): Promise<boolean> => {
-	const messages = createMessages(chatHistory);
-	const systemPrompt = await readFileContent("./prompt/shouldAnswer/system.md");
-	const examplePrompt = await createExamplePrompt("shouldAnswer");
-
-	const prompt = ChatPromptTemplate.fromMessages([
-		["system", systemPrompt],
-		["placeholder", "{messages}"],
-		examplePrompt,
-	]);
-
-	const parser = new StringOutputParser();
-	const localModel = await getlocalModel();
-	const chain = prompt.pipe(localModel).pipe(parser);
-	for (let i = 0; i < AIConfig.prompt.model.maxRetries; i++) {
-		try {
-			const response = await chain.invoke({
-				messages: messages,
-			});
-			const firstNumber = findFirstNumber(response);
-			return firstNumber === 1;
-		} catch (e) {
-			console.log("error:", e);
-			await sleep(1000);
-		}
+export const getShouldAnswer = (chatHistory: chatHistoryType): boolean => {
+	if (chatHistory[chatHistory.length - 1].ai) {
+		return false;
 	}
-	return false;
+	return countSentense(chatHistory[chatHistory.length - 1].human);
 };
 
-function findFirstNumber(str: string): number | undefined {
-	const regex = /\d/;
-	const match = str.match(regex);
-	return match ? Number.parseInt(match[0]) : undefined;
+function countSentense(text: string): boolean {
+	const periodCount = (text.match(/」/g) || []).length;
+
+	// 合計が2つ以上であればtrueを返す
+	return periodCount >= 2;
 }

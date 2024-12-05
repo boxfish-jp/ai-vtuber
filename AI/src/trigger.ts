@@ -14,7 +14,7 @@ export async function trigger() {
 		if (talkState.waiting) {
 			const chatHistory = await getChatHistory();
 			console.log("chatHistory", chatHistory);
-			const shouldAnswer = await getShouldAnswer(chatHistory);
+			const shouldAnswer = getShouldAnswer(chatHistory);
 			console.log("shouldAnswer", shouldAnswer);
 			if (shouldAnswer) {
 				aiState.talking = true;
