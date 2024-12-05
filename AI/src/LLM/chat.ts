@@ -1,5 +1,3 @@
-import { config } from "dotenv";
-config();
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { getlocalModel, gemini } from "./model";

@@ -15,7 +15,6 @@ let _localModel: LlamaCpp = await LlamaCpp.initialize({
 });
 
 const getGemini = () => {
-	process.env.GOOGLE_WEB_CREDENTIALS = process.env.GOOGLE_CREDENTIALS;
 	const gemini = new ChatVertexAI({
 		model: "gemini-1.5-flash",
 		maxOutputTokens: 50,
