@@ -109,7 +109,7 @@ export class voiceVoxAudio implements Audio {
 		}
 		try {
 			console.log("play", this.filePath);
-			const command = `"C:/Program Files/VLC/vlc.exe" --play-and-exit --gain=1.5 "${this.filePath}"`;
+			const command = `"C:/Program Files/VideoLAN/VLC/vlc.exe" --play-and-exit --gain=3.0 "${this.filePath}"`;
 			console.log("command: ", command);
 			await this.executeCommand(command);
 			this.deleteAudio();
