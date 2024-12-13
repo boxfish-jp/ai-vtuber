@@ -8,8 +8,9 @@ export const getShouldAnswer = (chatHistory: chatHistoryType): boolean => {
 };
 
 function countSentense(text: string): boolean {
-	const periodCount = (text.match(/」/g) || []).length;
+	const fuguoCount = (text.match(/ふぐお/g) || []).length;
+	const viewerCount = (text.match(/視聴者/g) || []).length;
 
 	// 合計が2つ以上であればtrueを返す
-	return periodCount >= 2;
+	return fuguoCount >= 2 || viewerCount >= 2;
 }
