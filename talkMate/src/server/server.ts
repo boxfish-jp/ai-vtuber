@@ -3,7 +3,7 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { talkMateEndpoint } from "../endpoint";
 import { createChat, getRecentChatHistory } from "../message/opeMess";
-import { sendAPI } from "./sendAPI";
+import { guiTalk } from "./gui_talk";
 import { initSocketServer } from "./socketServer";
 
 export const startServer = () => {
@@ -15,7 +15,7 @@ export const startServer = () => {
 		if (!chatId) {
 			return c.text("chatId is required", 400);
 		}
-		const response = await sendAPI(chatId, needScreenshot);
+		const response = await guiTalk(chatId, needScreenshot);
 		await createChat("ai", response);
 		return c.text(response);
 	});
