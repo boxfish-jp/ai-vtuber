@@ -66,7 +66,10 @@ export const ChatTable = ({
 								<FormItem>
 									<FormControl>
 										<RadioGroup
-											onValueChange={field.onChange}
+											onValueChange={(value) => {
+												field.onChange(value);
+												form.handleSubmit(onsubmit)();
+											}}
 											defaultValue={field.value?.toString()}
 										>
 											<ScrollArea className=" h-[80vh]">
