@@ -20,7 +20,7 @@ export async function trigger() {
 				aiState.talking = true;
 				const llmResponse = await chat(chatHistory, "");
 				console.log("llmResponse", llmResponse);
-				await createChatHistory("ai", llmResponse);
+				await createChatHistory("ai", llmResponse, false);
 				const action: Action = new AIAction(llmResponse);
 				await action.speak(sendMsg);
 				sendMsg(" ");
@@ -32,7 +32,7 @@ export async function trigger() {
 			aiState.talking = true;
 			console.log("beginTalk");
 			const llmResponse = await beginTalk();
-			await createChatHistory("ai", llmResponse);
+			await createChatHistory("ai", llmResponse, true);
 			const action: Action = new AIAction(llmResponse);
 			await action.speak(sendMsg);
 			sendMsg(" ");

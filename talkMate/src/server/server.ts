@@ -22,17 +22,16 @@ export const startServer = () => {
 
 	app.get("/message/", async (c) => {
 		console.log("request to /message/");
-		const len = c.req.query("len");
-		const length = Number(len);
-		if (!len || Number.isNaN(length)) {
-			return c.text("len is required", 400);
-		}
-		const messages = await getRecentChatHistory(length);
+		const messages = await getRecentChatHistory();
 		return c.json(messages);
 	});
 
 	app.post("/message/", async (c) => {
-		const body = (await c.req.json()) as { who: string; message: string };
+		const body = (await c.req.json()) as {
+			who: string;
+			message: string;
+			point: boolean;
+		};
 		if (
 			!body.who ||
 			!body.message ||
@@ -40,7 +39,7 @@ export const startServer = () => {
 		) {
 			return c.text("bad param", 400);
 		}
-		await createChat(body.who, body.message);
+		await createChat(body.who, body.message, body.point);
 		return c.text("ok");
 	});
 

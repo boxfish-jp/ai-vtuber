@@ -4,9 +4,13 @@ interface ChatStore {
 	getLatestChat(): Promise<Chat | null>;
 	getLatestClearedChat(): Promise<Chat | null>;
 	getSessionChat(sessionRangeStartId: number): Promise<Chat[]>;
-	getRecentChat(length: number): Promise<Chat[]>;
+	getRecentChat(): Promise<Chat[]>;
 	makeAsPointed(chatId: number): Promise<Chat>;
-	createChat(who: string, message: string): Promise<Chat>;
+	createChat(
+		who: string,
+		message: string,
+		point?: boolean | undefined,
+	): Promise<Chat>;
 }
 
 class PrismaChatStore implements ChatStore {
@@ -35,13 +39,23 @@ class PrismaChatStore implements ChatStore {
 		});
 	}
 
-	async getRecentChat(length: number): Promise<Chat[]> {
-		return (
-			await this.prisma.chat.findMany({
-				take: length,
-				orderBy: { id: "desc" },
-			})
-		).reverse();
+	async getRecentChat(): Promise<Chat[]> {
+		const maxPointId = await this.prisma.chat.findFirst({
+			where: { point: true },
+			orderBy: { id: "desc" },
+			select: { id: true },
+		});
+
+		if (!maxPointId) {
+			return [];
+		}
+		return await this.prisma.chat.findMany({
+			where: {
+				id: {
+					gte: maxPointId.id,
+				},
+			},
+		});
 	}
 
 	async makeAsPointed(chatId: number): Promise<Chat> {
@@ -51,11 +65,17 @@ class PrismaChatStore implements ChatStore {
 		});
 	}
 
-	async createChat(who: string, message: string): Promise<Chat> {
+	async createChat(
+		who: string,
+		message: string,
+		point?: boolean | undefined,
+	): Promise<Chat> {
+		const chatPoint = point ?? false;
 		return await this.prisma.chat.create({
 			data: {
 				who: who,
 				message: message,
+				point: chatPoint,
 			},
 		});
 	}

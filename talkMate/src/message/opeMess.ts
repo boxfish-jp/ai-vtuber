@@ -1,7 +1,6 @@
 import { broadcast } from "@/server/socketServer";
 import { getChatStore } from "./chatStore";
 import type { Chat } from ".prisma/client";
-import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 type chatHistoryType = { human: string; AI: string }[];
 
@@ -35,6 +34,7 @@ export const getIdToLatestChatHistory = async (
 ): Promise<chatHistoryType> => {
 	const chatStore = getChatStore();
 	const sessionChats = await chatStore.getSessionChat(chatId);
+	await chatStore.makeAsPointed(chatId);
 	const chatHistory = formatChatHistory(sessionChats);
 	return chatHistory;
 };
@@ -42,17 +42,16 @@ export const getIdToLatestChatHistory = async (
 export const createChat = async (
 	who: string,
 	message: string,
+	point?: boolean,
 ): Promise<void> => {
 	const chatStore = getChatStore();
-	const result = await chatStore.createChat(who, message);
+	const result = await chatStore.createChat(who, message, point);
 	broadcast(JSON.stringify([result]));
 };
 
-export const getRecentChatHistory = async (
-	length: number,
-): Promise<chatHistoryType> => {
+export const getRecentChatHistory = async (): Promise<chatHistoryType> => {
 	const chatStore = getChatStore();
-	const chats = await chatStore.getRecentChat(length);
+	const chats = await chatStore.getRecentChat();
 	const chatHistory = formatChatHistory(chats);
 	return chatHistory;
 };
