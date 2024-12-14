@@ -15,7 +15,7 @@ export class FuguoState implements talkStateDataType {
 	}
 
 	get waiting() {
-		return new Date().getTime() - this._talking > 5000 && !this.talking;
+		return new Date().getTime() - this._talking > 7000 && !this.talking;
 	}
 }
 
