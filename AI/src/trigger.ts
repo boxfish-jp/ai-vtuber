@@ -32,6 +32,7 @@ export async function trigger() {
 			aiState.talking = true;
 			console.log("beginTalk");
 			const llmResponse = await beginTalk();
+			await createChatHistory("ai", llmResponse);
 			const action: Action = new AIAction(llmResponse);
 			await action.speak(sendMsg);
 			sendMsg(" ");
