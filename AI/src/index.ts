@@ -14,6 +14,9 @@ const app = new Hono();
 trigger();
 
 app.post("/", async (c) => {
+	if (aiState.talking) {
+		return c.text("すでに発言中です。", 401);
+	}
 	aiState.talking = true;
 	const { data } = await c.req.json<{ data: chatHistoryType }>();
 	const { imageUrl } = await c.req.json<{ imageUrl: string | undefined }>();

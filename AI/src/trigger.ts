@@ -11,7 +11,7 @@ import { createChatHistory } from "./lib/createChatHistory";
 
 export async function trigger() {
 	while (true) {
-		if (talkState.waiting) {
+		if (talkState.waiting && !aiState.talking) {
 			const chatHistory = await getChatHistory();
 			console.log("chatHistory", chatHistory);
 			const shouldAnswer = getShouldAnswer(chatHistory);
@@ -28,7 +28,7 @@ export async function trigger() {
 			}
 		}
 
-		if (talkState.silence) {
+		if (talkState.silence && !aiState.talking) {
 			aiState.talking = true;
 			console.log("beginTalk");
 			const llmResponse = await beginTalk();
