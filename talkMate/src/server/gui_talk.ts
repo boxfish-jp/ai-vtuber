@@ -1,6 +1,6 @@
 import { takeScreenshot } from "@/lib/screenshot";
 import { AiEndpoint } from "../endpoint";
-import { getChatHistory } from "../message/opeMess";
+import { getIdToLatestChatHistory } from "../message/opeMess";
 
 export const guiTalk = async (chatId: number, needScreenshot: boolean) => {
 	const requestBody = await makeRequestBody(chatId, needScreenshot);
@@ -30,13 +30,13 @@ const makeRequestBody = async (
 	chatId: number,
 	needScreenshot: boolean,
 ): Promise<string> => {
-	const chatHistory = await getChatHistory(chatId);
+	const chatHistory = await getIdToLatestChatHistory(chatId);
 	if (!chatHistory) {
 		return "No chatHistory found";
 	}
 
 	if (needScreenshot) {
-		const imageUrl = await takeScreenshot(); // Add screenshot to chatHistory
+		const imageUrl = await takeScreenshot();
 		return JSON.stringify({
 			data: chatHistory,
 			imageUrl: imageUrl,

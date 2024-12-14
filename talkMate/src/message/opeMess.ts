@@ -30,7 +30,7 @@ const formatChatHistory = (sessionChats: Chat[]): chatHistoryType => {
 	return chatHistory;
 };
 
-export const getChatHistory = async (
+export const getIdToLatestChatHistory = async (
 	chatId: number,
 ): Promise<chatHistoryType> => {
 	const chatStore = getChatStore();
