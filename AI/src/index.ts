@@ -1,12 +1,11 @@
 import type { Server as HTTPServer } from "node:http";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { Server } from "socket.io"; // Import the 'Socket' type
+import { Server } from "socket.io";
 import endpoint from "../../endpoint.json";
 import { chat } from "./LLM/chat";
 import type { chatHistoryType } from "./type/chatHistoryType";
 import { AIAction, type Action } from "./action";
-import { beginTalk } from "./LLM/speakTo";
 import { fuguoState } from "./LLM/state/fuguo";
 import { trigger } from "./trigger";
 import { aiState } from "./LLM/state/ai";
@@ -32,17 +31,6 @@ app.post("/fuguo/", async (c) => {
 	const talking = c.req.query("talking") === "true";
 	fuguoState.talking = talking;
 	return c.text("ok");
-});
-
-app.post("/beginTalk/", async (c) => {
-	aiState.talking = true;
-	const llmResponse = await beginTalk();
-	console.log(llmResponse);
-	const action: Action = new AIAction(llmResponse);
-	await action.speak(sendMsg);
-	sendMsg(" ");
-	aiState.talking = false;
-	return c.text(llmResponse);
 });
 
 export const sendMsg = (msg: string) => {
