@@ -1,6 +1,7 @@
 import { NicoliveClient } from "@kikurage/nicolive-api/node";
 import * as cheerio from "cheerio";
 import { createChat } from "../message/opeMess";
+import { sendViewerAPI } from "@/server/send_ai";
 
 export const getNiconico = async (userId: string) => {
 	const pageText = await fetcher(
@@ -12,12 +13,14 @@ export const getNiconico = async (userId: string) => {
 		.on("chat", (chat) => {
 			console.log("niconico:", chat.content);
 			createChat("viewer", chat.content);
+			sendViewerAPI();
 		})
 		.on("simpleNotification", (notification) => {
 			const message = notification.message.value;
 			if (message) {
 				console.log("niconico:", message);
 				createChat("viewer", message);
+				sendViewerAPI();
 			}
 		})
 		.on("changeState", (state) => {
@@ -25,6 +28,7 @@ export const getNiconico = async (userId: string) => {
 			if (nusiCome) {
 				console.log("niconico:", nusiCome);
 				createChat("fuguo", nusiCome);
+				sendViewerAPI();
 			}
 		})
 		.connect();

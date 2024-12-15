@@ -9,6 +9,7 @@ import { AIAction, type Action } from "./action";
 import { fuguoState } from "./LLM/state/fuguo";
 import { trigger } from "./trigger";
 import { aiState } from "./LLM/state/ai";
+import { viewerState } from "./LLM/state/viewer";
 
 const app = new Hono();
 trigger();
@@ -33,6 +34,11 @@ app.post("/", async (c) => {
 app.post("/fuguo/", async (c) => {
 	const talking = c.req.query("talking") === "true";
 	fuguoState.talking = talking;
+	return c.text("ok");
+});
+
+app.post("/viewer/", async (c) => {
+	viewerState.setTalking();
 	return c.text("ok");
 });
 

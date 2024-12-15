@@ -1,5 +1,6 @@
 import { aiState, type AiState } from "./ai";
 import { type FuguoState, fuguoState } from "./fuguo";
+import { viewerState, type ViewerState } from "./viewer";
 
 export interface talkStateDataType {
 	talking: boolean;
@@ -7,31 +8,53 @@ export interface talkStateDataType {
 	waiting: boolean;
 }
 
-export class TalkState implements talkStateDataType {
+export interface talkStateType extends talkStateDataType {
+	checking: boolean;
+}
+
+export class TalkState implements talkStateType {
 	private fuguoTalkState: FuguoState;
 	private aiTalkState: AiState;
+	private viewerState: ViewerState;
 	private checkTime: number;
 
-	constructor(fuguoState: FuguoState, aiState: AiState) {
+	constructor(
+		fuguoState: FuguoState,
+		aiState: AiState,
+		viewerState: ViewerState,
+	) {
 		this.fuguoTalkState = fuguoState;
 		this.aiTalkState = aiState;
+		this.viewerState = viewerState;
 		this.checkTime = 0;
 	}
 
 	get silence(): boolean {
-		return this.fuguoTalkState.silence && this.aiTalkState.silence;
+		return (
+			this.fuguoTalkState.silence &&
+			this.aiTalkState.silence &&
+			this.viewerState.silence
+		);
 	}
 
 	get waiting(): boolean {
 		console.log(`this.fuguoTalkState.waiting: ${this.fuguoTalkState.waiting}`);
 		console.log(`this.aiTalkState.waiting: ${this.aiTalkState.waiting}`);
+		console.log(`this.viewerState.waiting: ${this.viewerState.waiting}`);
 		return (
-			this.fuguoTalkState.waiting && this.aiTalkState.waiting && this.checking
+			this.fuguoTalkState.waiting &&
+			this.aiTalkState.waiting &&
+			this.viewerState.waiting &&
+			this.checking
 		);
 	}
 
 	get talking(): boolean {
-		return this.fuguoTalkState.talking || this.aiTalkState.talking;
+		return (
+			this.fuguoTalkState.talking ||
+			this.aiTalkState.talking ||
+			this.viewerState.waiting
+		);
 	}
 
 	get checking(): boolean {
@@ -43,4 +66,8 @@ export class TalkState implements talkStateDataType {
 	}
 }
 
-export const talkState: TalkState = new TalkState(fuguoState, aiState);
+export const talkState: TalkState = new TalkState(
+	fuguoState,
+	aiState,
+	viewerState,
+);

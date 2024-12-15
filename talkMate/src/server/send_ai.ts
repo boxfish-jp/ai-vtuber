@@ -12,3 +12,15 @@ export const sendFuguoAPI = async (talking: boolean): Promise<void> => {
 		});
 	} catch (e) {}
 };
+
+export const sendViewerAPI = async (): Promise<void> => {
+	const url = new URL(`${AiEndpoint}/viewer/`);
+	try {
+		await fetch(url, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+		});
+	} catch (e) {}
+};
