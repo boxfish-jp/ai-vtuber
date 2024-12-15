@@ -1,7 +1,5 @@
-import { exec } from "node:child_process";
-import { unlinkSync, writeFileSync } from "node:fs";
+import { readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import iconv from "iconv-lite";
 import endpoint from "../../../endpoint.json";
 import AIConfig from "../../AIConfig.json";
 import { sleep } from "../lib/sleep";
@@ -74,18 +72,6 @@ export class voiceVoxAudio implements Audio {
 		console.log("Audio created: ", this.filePath);
 	}
 
-	async executeCommand(command: string): Promise<void> {
-		await new Promise<void>((resolve) =>
-			exec(command, { encoding: "buffer" }, (err, stdout, stderr) => {
-				if (err) {
-					console.log(`stderr: ${iconv.decode(stderr, "Shift_JIS")}`);
-					return;
-				}
-				resolve();
-			}),
-		);
-	}
-
 	async deleteAudio(): Promise<void> {
 		try {
 			unlinkSync(this.filePath);
@@ -109,9 +95,19 @@ export class voiceVoxAudio implements Audio {
 		}
 		try {
 			console.log("play", this.filePath);
-			const command = `"C:/Program Files/VideoLAN/VLC/vlc.exe" --play-and-exit --gain=3.0 "${this.filePath}"`;
-			console.log("command: ", command);
-			await this.executeCommand(command);
+			const fileBuffer = readFileSync(this.filePath);
+			const url = `http://${endpoint.audio.ip}:${endpoint.audio.port}`;
+			const response = await fetch(url, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/octet-stream",
+				},
+				body: fileBuffer,
+			});
+
+			if (!response.ok) {
+				throw new Error(`Failed to post audio data: ${response.statusText}`);
+			}
 			this.deleteAudio();
 		} catch (e) {
 			throw new Error(`Failed to play audio: ${String(e)}`);

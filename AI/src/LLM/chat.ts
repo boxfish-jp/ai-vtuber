@@ -30,16 +30,10 @@ export const chat = async (
 	const chain = imageUrl
 		? prompt.pipe(gemini).pipe(parser)
 		: prompt.pipe(localModel).pipe(parser);
-	for (let i = 0; i < AIConfig.prompt.model.maxRetries; i++) {
-		try {
-			const response = await chain.invoke({
-				messages: messages,
-			});
-			return response.replace(/[\r\n]+/g, "");
-		} catch (e) {
-			console.log("error:", e);
-			await sleep(1000);
-		}
-	}
-	return "思考が停止しました";
+	console.log("chain ");
+	const response = await chain.invoke({
+		messages: messages,
+	});
+	console.log(response);
+	return response.replace(/[\r\n]+/g, "");
 };
