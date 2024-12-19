@@ -32,7 +32,13 @@ export const chat = async (
       const response = await chain.invoke({
         messages: messages,
       });
-      return response.replace(/[\r\n]+/g, "");
+      const trimmedResponse = response.replace(/[\r\n]+/g, "");
+      if (/[。！？?.]$/.test(trimmedResponse)) {
+        return trimmedResponse;
+      } else {
+        const match = trimmedResponse.match(/.*[。！？?,]/);
+        return match ? match[0] : trimmedResponse;
+      }
     } catch (e) {
       console.log("error:", e);
       await sleep(1000);
