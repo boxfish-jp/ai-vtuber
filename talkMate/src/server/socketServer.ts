@@ -3,7 +3,7 @@ import type { ServerType } from "@hono/node-server";
 import type { DefaultEventsMap } from "node_modules/socket.io/dist/typed-events";
 import { Server } from "socket.io";
 import { createChat } from "../message/opeMess";
-import { sendFuguoAPI } from "./send_ai";
+import { sendAPI } from "./send_ai";
 
 interface SocketServerType {
 	broadcast: (message: string) => void;
@@ -33,8 +33,8 @@ class SocketIoServer implements SocketServerType {
 				createChat("fuguo", msg);
 			});
 
-			socket.on("SPEECH", (msg) => {
-				sendFuguoAPI(msg === "START");
+			socket.on("SPEECH", async (msg) => {
+				await sendAPI<boolean>("fuguo", { talking: msg === "START" });
 			});
 		});
 		console.log("init");
