@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Chat } from "@prisma/client";
 
 export const insertChatDb = async (
 	unixTime: number,
@@ -15,4 +15,31 @@ export const insertChatDb = async (
 		},
 	});
 };
+
+export const getLatestChatSection = async (): Promise<Chat[]> => {
+	const maxPointId = await prismaClient.chat.findFirst({
+		where: { point: true },
+		orderBy: { id: "desc" },
+		select: { id: true },
+	});
+
+	if (!maxPointId) {
+		return [];
+	}
+	return await prismaClient.chat.findMany({
+		where: {
+			id: {
+				gte: maxPointId.id,
+			},
+		},
+	});
+};
+
+export const makeAsPointed = async (unixTime: number): Promise<void> => {
+	await prismaClient.chat.updateMany({
+		where: { unixTime: unixTime },
+		data: { point: true },
+	});
+};
+
 const prismaClient = new PrismaClient();

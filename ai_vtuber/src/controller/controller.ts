@@ -1,7 +1,12 @@
-import { insertChatDb } from "./db/chat_db.js";
+import {
+	getLatestChatSection,
+	insertChatDb,
+	makeAsPointed,
+} from "./db/chat_db.js";
 import { getFuguoState } from "./state/fuguo.js";
 import { getViewerState } from "./state/viewer.js";
-import type { Chat } from "@prisma/client";
+import type { LLM } from "../llm/llm.js";
+import { takeScreenshot } from "../take_screenShot/take_screenshot.js";
 
 export interface controllerType {
 	addChat(
@@ -17,9 +22,9 @@ export interface controllerType {
 }
 
 export class Controller implements controllerType {
-	private readonly talk: (chats: Chat[]) => Promise<void>;
+	private readonly talk: LLM["talk"];
 
-	constructor(talk: (chats: Chat[]) => Promise<void>) {
+	constructor(talk: LLM["talk"]) {
 		this.talk = talk;
 	}
 	async addChat(
@@ -40,7 +45,10 @@ export class Controller implements controllerType {
 		fuguoState.talking = speaking;
 	}
 
-	talkToAi(unixTime: number, needScreenShot: boolean): Promise<void> {
-		throw new Error("Method not implemented.");
+	async talkToAi(unixTime: number, needScreenShot: boolean): Promise<void> {
+		const imageUrl = needScreenShot ? await takeScreenshot() : "";
+		await makeAsPointed(unixTime);
+		const latestChatSection = await getLatestChatSection();
+		await this.talk(latestChatSection, imageUrl);
 	}
 }
