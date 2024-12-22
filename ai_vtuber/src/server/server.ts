@@ -26,6 +26,7 @@ export const createServer = (
 		socket.on("chat", (msg: string) => {
 			const receivedMessage = socketServerChatSchema.parse(JSON.parse(msg));
 			addChat(
+				receivedMessage.unixTime,
 				receivedMessage.who,
 				receivedMessage.chatText,
 				receivedMessage.point,

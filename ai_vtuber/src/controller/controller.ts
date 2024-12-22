@@ -5,6 +5,7 @@ import type { Chat } from "@prisma/client";
 
 export interface controllerType {
 	addChat(
+		unixTime: number,
 		who: "ai" | "fuguo" | "viewer" | "announce",
 		chatText: string,
 		point: boolean,
@@ -22,6 +23,7 @@ export class Controller implements controllerType {
 		this.talk = talk;
 	}
 	async addChat(
+		unixTime: number,
 		who: "ai" | "fuguo" | "viewer" | "announce",
 		chatText: string,
 		point: boolean,
@@ -30,7 +32,7 @@ export class Controller implements controllerType {
 			const viewerState = getViewerState();
 			viewerState.setTalking();
 		}
-		await insertChatDb(who, chatText, point);
+		await insertChatDb(unixTime, who, chatText, point);
 	}
 
 	speakStateChange(speaking: boolean): void {
