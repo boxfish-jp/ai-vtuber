@@ -33,15 +33,15 @@ function App() {
 
 	useEffect(() => {
 		socket = new SocketControler();
-		socket.watchChat((newChats) => {
-			setChats(newChats);
-			listEndRef.current?.scrollIntoView({ behavior: "smooth" });
-		});
-		socket.sendEvent("RESULT", "test");
 		speechRecognition((eventName, content) => {
 			socket?.sendEvent(eventName, content);
 		});
-	}, []);
+		socket?.watchChat((chat) => {
+			setChats((prev) => [...prev, chat]);
+			listEndRef.current?.scrollIntoView({ behavior: "smooth" });
+			console.log("chats", chats);
+		});
+	}, [socket]);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -63,7 +63,7 @@ function App() {
 	};
 
 	return (
-		<main>
+		<div>
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
@@ -142,7 +142,7 @@ function App() {
 				</form>
 			</Form>
 			<Toaster />
-		</main>
+		</div>
 	);
 }
 
