@@ -8,24 +8,12 @@ export interface socketServerChatType {
 	point: boolean;
 }
 
-export const watchChat = (
-	callback: (newChats: socketServerChatType[]) => void,
-) => {
-	const socket = getSocketControler();
-	socket.watchChat(callback);
-};
-
-export const sendEvent = (eventName: string, content: string) => {
-	const socket = getSocketControler();
-	socket.sendEvent(eventName, content);
-};
-
 export interface SocketControlerType {
 	watchChat(callback: (newChats: socketServerChatType[]) => void): void;
 	sendEvent(eventName: string, content: string): void;
 }
 
-class SocketControler implements SocketControlerType {
+export class SocketControler implements SocketControlerType {
 	private _chats: socketServerChatType[] = [];
 	private _socket: Socket;
 
@@ -34,7 +22,10 @@ class SocketControler implements SocketControlerType {
 		if (!wsEndpoint) {
 			throw new Error("WS_URL is not set");
 		}
-		this._socket = io(wsEndpoint, { path: "/socket" });
+		this._socket = io(wsEndpoint, { path: "/ws" });
+		this._socket.on("connect", () => {
+			console.log("connect");
+		});
 	}
 
 	get chats(): socketServerChatType[] {
@@ -61,16 +52,6 @@ class SocketControler implements SocketControlerType {
 	}
 }
 
-let socketControler: SocketControlerType | null = null;
-
-const getSocketControler = () => {
-	if (!socketControler) {
-		socketControler = new SocketControler();
-	}
-
-	return socketControler;
-};
-
 const getWsEndpoint = (): string => {
-	return `http://${endpointJson.AI.ip}:${endpointJson.AI.port}`;
+	return `http://${endpointJson.ai_vtuber.address}:${endpointJson.ai_vtuber.port}`;
 };

@@ -1,11 +1,10 @@
-const SpeechRecognitionAPI =
-	window.SpeechRecognition || window.webkitSpeechRecognition;
-
-const recognition = new SpeechRecognitionAPI();
-
 export const speechRecognition = (
 	sendEvent: (eventName: string, content: string) => void,
 ) => {
+	const SpeechRecognitionAPI =
+		window.SpeechRecognition || window.webkitSpeechRecognition;
+
+	const recognition = new SpeechRecognitionAPI();
 	recognition.onresult = (event) => {
 		const content = event.results[0][0].transcript;
 		console.log(content);
@@ -30,10 +29,11 @@ export const speechRecognition = (
 	};
 
 	recognition.onend = () => {
-		speechRecognition(sendEvent);
+		recognition.start();
 	};
 
 	recognition.lang = "ja";
 
 	recognition.start();
+	console.log("call");
 };
