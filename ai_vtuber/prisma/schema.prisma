@@ -12,7 +12,7 @@ datasource db {
 
 model Chat {
   id        Int   @id @default(autoincrement())
-  unixTime  Int
+  unixTime  BigInt
   who       String   
   point    Boolean   @default(false)
   message   String
