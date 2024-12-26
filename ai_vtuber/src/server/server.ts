@@ -3,6 +3,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { Server } from "socket.io";
 import { z } from "zod";
+import endpointJson from "../../../endpoint.json";
 import type { controllerType } from "../controller/controller.js";
 
 const socketServerChatSchema = z.object({
@@ -22,7 +23,7 @@ export const createServer = (
 	speakStateChange: controllerType["speakStateChange"],
 	talkToAi: controllerType["talkToAi"],
 ) => {
-	ioServer.on("message", (socket) => {
+	ioServer.on("connection", (socket) => {
 		socket.on("chat", (msg: string) => {
 			const receivedMessage = socketServerChatSchema.parse(JSON.parse(msg));
 			addChat(
@@ -31,7 +32,7 @@ export const createServer = (
 				receivedMessage.chatText,
 				receivedMessage.point,
 			);
-			socket.emit(JSON.stringify(receivedMessage));
+			socket.emit("chat", JSON.stringify(receivedMessage));
 		});
 
 		socket.on("speak", (msg: string): void => {
@@ -50,8 +51,8 @@ const app = new Hono();
 const server = serve(
 	{
 		fetch: app.fetch,
-		hostname: "localhost",
-		port: Number("3000"),
+		hostname: endpointJson.ai_vtuber.address,
+		port: Number(endpointJson.ai_vtuber.port),
 	},
 	(info) => {
 		console.log(`server is running on  http://${info.address}:${info.port}`);

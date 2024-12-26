@@ -9,12 +9,11 @@ export interface socketServerChatType {
 }
 
 export interface SocketControlerType {
-	watchChat(callback: (newChats: socketServerChatType[]) => void): void;
+	watchChat(callback: (newChat: socketServerChatType) => void): void;
 	sendEvent(eventName: string, content: string): void;
 }
 
 export class SocketControler implements SocketControlerType {
-	private _chats: socketServerChatType[] = [];
 	private _socket: Socket;
 
 	constructor() {
@@ -28,27 +27,16 @@ export class SocketControler implements SocketControlerType {
 		});
 	}
 
-	get chats(): socketServerChatType[] {
-		return this._chats;
-	}
-
-	watchChat(callback: (newChats: socketServerChatType[]) => void): void {
-		this._socket.on("message", (event: string) => {
-			const chat = JSON.parse(event) as socketServerChatType[];
-			this.pushChats(chat);
+	watchChat(callback: (newChat: socketServerChatType) => void): void {
+		this._socket.on("chat", (event: string) => {
+			const chat = JSON.parse(event) as socketServerChatType;
 			console.log(chat);
-			callback(this.chats);
+			callback(chat);
 		});
 	}
 
 	sendEvent(eventName: string, content: string): void {
 		this._socket.emit(eventName, content);
-	}
-
-	pushChats(chats: socketServerChatType[]) {
-		this._chats = [...this._chats, ...chats];
-
-		return this._chats;
 	}
 }
 

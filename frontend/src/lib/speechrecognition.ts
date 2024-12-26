@@ -15,7 +15,7 @@ export const speechRecognition = (
 			unixTime,
 			point: false,
 		});
-		sendEvent("result", jsonData);
+		sendEvent("chat", jsonData);
 	};
 
 	recognition.onspeechstart = () => {
@@ -25,7 +25,7 @@ export const speechRecognition = (
 
 	recognition.onspeechend = () => {
 		console.log("speechEnd");
-		sendEvent("speak", "true");
+		sendEvent("speak", "false");
 	};
 
 	recognition.onend = () => {
