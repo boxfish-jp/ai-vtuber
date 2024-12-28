@@ -42,7 +42,7 @@ export const getLatestChatSection = async (): Promise<Chat[]> => {
 	});
 };
 
-export const makeAsPointed = async (unixTime: number): Promise<void> => {
+export const makeAsPointed = async (unixTime: bigint): Promise<void> => {
 	await prismaClient.chat.updateMany({
 		where: { unixTime: unixTime },
 		data: { point: true },

@@ -1,3 +1,4 @@
+import type { Chat } from "@prisma/client";
 import type { LLM } from "../llm/llm.js";
 import { takeScreenshot } from "../take_screenShot/take_screenshot.js";
 import {
@@ -10,15 +11,18 @@ import { getViewerState } from "./state/viewer.js";
 
 export interface controllerType {
 	addChat(
-		unixTime: number,
+		unixTime: bigint,
 		who: "ai" | "fuguo" | "viewer" | "announce",
 		chatText: string,
 		point: boolean,
-	): Promise<void>;
+	): Promise<Chat>;
 
-	speakStateChange(speaking: boolean): void;
+	speakStateChange(speaking: boolean): boolean;
 
-	talkToAi(unixTime: number, needScreenShot: boolean): Promise<void>;
+	talkToAi(
+		unixTime: bigint,
+		needScreenShot: boolean,
+	): Promise<{ chats: Chat[]; url: string }>;
 }
 
 export class Controller implements controllerType {
@@ -28,29 +32,35 @@ export class Controller implements controllerType {
 		this.talk = talk;
 	}
 	async addChat(
-		unixTime: number,
+		unixTime: bigint,
 		who: "ai" | "fuguo" | "viewer" | "announce",
 		chatText: string,
 		point: boolean,
-	): Promise<void> {
+	): Promise<Chat> {
 		if (who === "viewer") {
 			const viewerState = getViewerState();
 			viewerState.setTalking();
 		}
-		await insertChatDb(unixTime, who, chatText, point);
+		const createdChat = await insertChatDb(unixTime, who, chatText, point);
+		return createdChat;
 	}
 
-	speakStateChange(speaking: boolean): void {
+	speakStateChange(speaking: boolean): boolean {
 		const fuguoState = getFuguoState();
 		fuguoState.talking = speaking;
+		return fuguoState.talking;
 	}
 
-	async talkToAi(unixTime: number, needScreenShot: boolean): Promise<void> {
+	async talkToAi(
+		unixTime: bigint,
+		needScreenShot: boolean,
+	): Promise<{ chats: Chat[]; url: string }> {
 		const imageUrl = needScreenShot ? await takeScreenshot() : "";
+		await makeAsPointed(unixTime);
 		const latestChatSection = await getLatestChatSection();
 		console.log(latestChatSection);
 		console.log(imageUrl);
 		await this.talk(latestChatSection, imageUrl);
-		await makeAsPointed(unixTime);
+		return { chats: latestChatSection, url: imageUrl };
 	}
 }
