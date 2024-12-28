@@ -14,7 +14,7 @@ const socketServerChatSchema = z.object({
 });
 
 const socketServerTalkToAiSchema = z.object({
-	unixTime: z.number(),
+	unixTime: z.string(),
 	needScreenshot: z.boolean(),
 });
 
@@ -36,12 +36,14 @@ export const createServer = (
 		});
 
 		socket.on("speak", (msg: string): void => {
+			console.log(msg);
 			speakStateChange(msg === "true");
 		});
 
-		socket.on("talkToAi", (msg: string): void => {
+		socket.on("start", (msg: string): void => {
 			const talkToContent = socketServerTalkToAiSchema.parse(JSON.parse(msg));
-			talkToAi(talkToContent.unixTime, talkToContent.needScreenshot);
+			console.log("receivedMessage");
+			talkToAi(Number(talkToContent.unixTime), talkToContent.needScreenshot);
 		});
 	});
 };

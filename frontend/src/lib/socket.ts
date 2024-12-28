@@ -8,12 +8,24 @@ export interface socketServerChatType {
 	point: boolean;
 }
 
-export interface SocketControlerType {
+export const watchChat = (
+	callback: (newChat: socketServerChatType) => void,
+): void => {
+	const socket = getSocketControler();
+	socket.watchChat(callback);
+};
+
+export const sendEvent = (eventName: string, content: string): void => {
+	const socket = getSocketControler();
+	socket.sendEvent(eventName, content);
+};
+
+interface SocketControlerType {
 	watchChat(callback: (newChat: socketServerChatType) => void): void;
 	sendEvent(eventName: string, content: string): void;
 }
 
-export class SocketControler implements SocketControlerType {
+class SocketControler implements SocketControlerType {
 	private _socket: Socket;
 
 	constructor() {
@@ -39,6 +51,15 @@ export class SocketControler implements SocketControlerType {
 		this._socket.emit(eventName, content);
 	}
 }
+
+let socketControler: SocketControler | undefined;
+
+export const getSocketControler = (): SocketControler => {
+	if (!socketControler) {
+		socketControler = new SocketControler();
+	}
+	return socketControler;
+};
 
 const getWsEndpoint = (): string => {
 	return `http://${endpointJson.ai_vtuber.address}:${endpointJson.ai_vtuber.port}`;

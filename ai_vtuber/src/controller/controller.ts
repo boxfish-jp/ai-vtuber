@@ -1,3 +1,5 @@
+import type { LLM } from "../llm/llm.js";
+import { takeScreenshot } from "../take_screenShot/take_screenshot.js";
 import {
 	getLatestChatSection,
 	insertChatDb,
@@ -5,8 +7,6 @@ import {
 } from "./db/chat_db.js";
 import { getFuguoState } from "./state/fuguo.js";
 import { getViewerState } from "./state/viewer.js";
-import type { LLM } from "../llm/llm.js";
-import { takeScreenshot } from "../take_screenShot/take_screenshot.js";
 
 export interface controllerType {
 	addChat(
@@ -47,8 +47,10 @@ export class Controller implements controllerType {
 
 	async talkToAi(unixTime: number, needScreenShot: boolean): Promise<void> {
 		const imageUrl = needScreenShot ? await takeScreenshot() : "";
-		await makeAsPointed(unixTime);
 		const latestChatSection = await getLatestChatSection();
+		console.log(latestChatSection);
+		console.log(imageUrl);
 		await this.talk(latestChatSection, imageUrl);
+		await makeAsPointed(unixTime);
 	}
 }

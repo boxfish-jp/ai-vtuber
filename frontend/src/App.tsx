@@ -17,11 +17,11 @@ import {
 } from "./components/ui/table";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
-import { SocketControler, type socketServerChatType } from "./lib/socket";
+import { sendEvent, type socketServerChatType, watchChat } from "./lib/socket";
 import { speechRecognition } from "./lib/speechrecognition";
 
 const formSchema = z.object({
-	unixTime: z.number(),
+	unixTime: z.string(),
 	needScreenshot: z.boolean().default(false),
 });
 
@@ -29,19 +29,17 @@ function App() {
 	const [chats, setChats] = useState<socketServerChatType[]>([]);
 	const listEndRef = useRef<HTMLTableRowElement>(null);
 	const { toast } = useToast();
-	let socket: SocketControler | undefined = undefined;
 
 	useEffect(() => {
-		socket = new SocketControler();
 		speechRecognition((eventName, content) => {
-			socket?.sendEvent(eventName, content);
+			sendEvent(eventName, content);
 		});
-		socket?.watchChat((chat) => {
+		watchChat((chat) => {
 			setChats((prev) => [...prev, chat]);
 			listEndRef.current?.scrollIntoView({ behavior: "smooth" });
 			console.log("chats", chats);
 		});
-	}, [socket]);
+	}, []);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -52,8 +50,8 @@ function App() {
 		toast({
 			title: "AIに送信しました",
 		});
-		socket?.sendEvent(
-			"talkToAi",
+		sendEvent(
+			"start",
 			JSON.stringify({
 				unixTime: data.unixTime,
 				needScreenshot: data.needScreenshot,
