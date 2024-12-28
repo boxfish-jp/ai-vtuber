@@ -4,10 +4,10 @@ import { MakeAudio, type makeAudioType } from "./make_audio/make_audio.js";
 import { createServer } from "./server/server.js";
 
 const makeAudio: makeAudioType = new MakeAudio();
-const llm: llmType = new LLM(makeAudio.addQueue);
-const controller: controllerType = new Controller(llm.talk);
+const llm: llmType = new LLM(makeAudio.addQueue.bind(makeAudio));
+const controller: controllerType = new Controller(llm.talk.bind(llm));
 createServer(
-	controller.addChat,
-	controller.speakStateChange,
-	controller.talkToAi,
+	controller.addChat.bind(controller),
+	controller.speakStateChange.bind(controller),
+	controller.talkToAi.bind(controller),
 );
