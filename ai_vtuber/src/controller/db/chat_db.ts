@@ -1,18 +1,25 @@
-import { PrismaClient, type Chat } from "@prisma/client";
+import { type Chat, PrismaClient } from "@prisma/client";
 
 export const insertChatDb = async (
-	unixTime: number,
+	unixTime: bigint,
 	who: string,
 	message: string,
 	point: boolean | undefined,
-): Promise<void> => {
-	await prismaClient.chat.create({
+): Promise<Chat> => {
+	const created = prismaClient.chat.create({
 		data: {
 			unixTime: unixTime,
 			who: who,
 			message: message,
 			point: point,
 		},
+	});
+	return created;
+};
+
+export const deleteChatDb = async (unixTime: bigint): Promise<void> => {
+	await prismaClient.chat.deleteMany({
+		where: { unixTime: unixTime },
 	});
 };
 
