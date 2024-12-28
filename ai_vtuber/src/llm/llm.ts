@@ -1,19 +1,19 @@
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 import type { Chat } from "@prisma/client";
+import type { makeAudioType } from "../make_audio/make_audio.js";
+import { cleanLlmResponse } from "./lib/cleanLlmResponse.js";
 import { convertToChatPrompt } from "./lib/convert/chats.js";
+import { convertToExamplePrompt } from "./lib/convert/example.js";
 import { convertToInputPrompt } from "./lib/convert/input.js";
+import { gemini } from "./lib/model.js";
 import {
 	getTalkExamplePromptData,
 	getTalkSystemPrompt,
 } from "./prompt/talk.js";
-import { convertToExamplePrompt } from "./lib/convert/example.js";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { StringOutputParser } from "@langchain/core/output_parsers";
-import { gemini } from "./lib/model.js";
-import { cleanLlmResponse } from "./lib/cleanLlmResponse.js";
-import type { makeAudioType } from "../make_audio/make_audio.js";
 
 export interface llmType {
-	talk(chats: Chat[], screenshotUrl: string): Promise<void>;
+	talk(chats: Chat[], screenshotUrl: string): Promise<string>;
 }
 
 export class LLM implements llmType {
@@ -22,7 +22,7 @@ export class LLM implements llmType {
 		this.addQueue = addQueue;
 	}
 
-	async talk(chats: Chat[], screenshotUrl: string): Promise<void> {
+	async talk(chats: Chat[], screenshotUrl: string): Promise<string> {
 		const chatsPrompt = convertToChatPrompt(chats);
 		const inputPrompt = convertToInputPrompt(chats, screenshotUrl);
 		const systemPrompt = getTalkSystemPrompt();
@@ -42,10 +42,14 @@ export class LLM implements llmType {
 			const response = await chain.invoke({
 				chats: chatsPrompt,
 			});
-			this.addQueue(cleanLlmResponse(response));
+			const cleanedResponse = cleanLlmResponse(response);
+			this.addQueue(cleanedResponse);
+			return response;
 		} catch (e) {
 			console.log("error:", e);
-			this.addQueue("思考が停止しました。");
+			const response = "思考が停止しました。";
+			this.addQueue(response);
+			return response;
 		}
 	}
 }
