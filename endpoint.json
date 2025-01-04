@@ -1,6 +1,14 @@
 {
-	"ai_vtuber": {
-		"address": "localhost",
-		"port": "2525"
-	}
+  "ai_vtuber": {
+    "address": "localhost",
+    "port": "2525"
+  },
+  "audio": {
+    "ip": "localhost",
+    "port": "4000"
+  },
+  "TTS": {
+    "ip": "localhost",
+    "port": "50021"
+  }
 }
