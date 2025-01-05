@@ -4,7 +4,7 @@ export const getShouldAnswer = (chatHistorys: Chat[]): boolean => {
 	if (chatHistorys[chatHistorys.length - 1].who === "ai") {
 		return false;
 	}
-	const reversedChatHistory = chatHistorys.reverse();
+	const reversedChatHistory = structuredClone(chatHistorys).reverse();
 	let viewerCount = 0;
 	let fuguoCount = 0;
 	for (const chatHistory of reversedChatHistory) {
