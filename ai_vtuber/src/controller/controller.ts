@@ -1,6 +1,7 @@
 import type { Chat } from "@prisma/client";
 import type { LLM } from "../llm/llm.js";
 import { takeScreenshot } from "../take_screenShot/take_screenshot.js";
+import { auto } from "./auto/auto.js";
 import {
 	getLatestChatSection,
 	insertChatDb,
@@ -30,6 +31,7 @@ export class Controller implements controllerType {
 
 	constructor(talk: LLM["talk"]) {
 		this.talk = talk;
+		auto(talk);
 	}
 	async addChat(
 		unixTime: number,
