@@ -1,6 +1,7 @@
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import type { Chat } from "@prisma/client";
+import { getAiState } from "../controller/state/ai.js";
 import type { makeAudioType } from "../make_audio/make_audio.js";
 import { cleanLlmResponse } from "./lib/cleanLlmResponse.js";
 import { convertToChatPrompt } from "./lib/convert/chats.js";
@@ -23,6 +24,11 @@ export class LLM implements llmType {
 	}
 
 	async talk(chats: Chat[], screenshotUrl: string): Promise<string> {
+		const aiState = getAiState();
+		if (aiState.talking) {
+			return "思考中です。";
+		}
+		aiState.talking = true;
 		const chatsPrompt = convertToChatPrompt(chats);
 		const inputPrompt = convertToInputPrompt(chats, screenshotUrl);
 		const systemPrompt = getTalkSystemPrompt();
