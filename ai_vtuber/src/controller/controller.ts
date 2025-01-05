@@ -11,7 +11,7 @@ import { getViewerState } from "./state/viewer.js";
 
 export interface controllerType {
 	addChat(
-		unixTime: bigint,
+		unixTime: number,
 		who: "ai" | "fuguo" | "viewer" | "announce",
 		chatText: string,
 		point: boolean,
@@ -20,7 +20,7 @@ export interface controllerType {
 	speakStateChange(speaking: boolean): boolean;
 
 	talkToAi(
-		unixTime: bigint,
+		unixTime: number,
 		needScreenShot: boolean,
 	): Promise<{ chats: Chat[]; url: string }>;
 }
@@ -32,7 +32,7 @@ export class Controller implements controllerType {
 		this.talk = talk;
 	}
 	async addChat(
-		unixTime: bigint,
+		unixTime: number,
 		who: "ai" | "fuguo" | "viewer" | "announce",
 		chatText: string,
 		point: boolean,
@@ -52,7 +52,7 @@ export class Controller implements controllerType {
 	}
 
 	async talkToAi(
-		unixTime: bigint,
+		unixTime: number,
 		needScreenShot: boolean,
 	): Promise<{ chats: Chat[]; url: string }> {
 		const imageUrl = needScreenShot ? await takeScreenshot() : "";

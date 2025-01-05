@@ -1,14 +1,14 @@
 import { type Chat, PrismaClient } from "@prisma/client";
 
 export const insertChatDb = async (
-	unixTime: bigint,
+	unixTime: number,
 	who: string,
 	message: string,
 	point: boolean | undefined,
 ): Promise<Chat> => {
 	const created = prismaClient.chat.create({
 		data: {
-			unixTime: unixTime,
+			unixTime: BigInt(unixTime),
 			who: who,
 			message: message,
 			point: point,
@@ -42,9 +42,9 @@ export const getLatestChatSection = async (): Promise<Chat[]> => {
 	});
 };
 
-export const makeAsPointed = async (unixTime: bigint): Promise<void> => {
+export const makeAsPointed = async (unixTime: number): Promise<void> => {
 	await prismaClient.chat.updateMany({
-		where: { unixTime: unixTime },
+		where: { unixTime: BigInt(unixTime) },
 		data: { point: true },
 	});
 };
