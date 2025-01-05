@@ -1,6 +1,6 @@
-import { getAiState, type AiState } from "./ai.js";
+import { type AiState, getAiState } from "./ai.js";
 import { type FuguoState, getFuguoState } from "./fuguo.js";
-import { getViewerState, type ViewerState } from "./viewer.js";
+import { type ViewerState, getViewerState } from "./viewer.js";
 
 export interface talkStateDataType {
 	talking: boolean;
@@ -38,9 +38,11 @@ export class TalkState implements talkStateType {
 	}
 
 	get waiting(): boolean {
+		/*
 		console.log(`this.fuguoTalkState.waiting: ${this.fuguoTalkState.waiting}`);
 		console.log(`this.aiTalkState.waiting: ${this.aiTalkState.waiting}`);
 		console.log(`this.viewerState.waiting: ${this.viewerState.waiting}`);
+    */
 		return (
 			this.fuguoTalkState.waiting &&
 			this.aiTalkState.waiting &&

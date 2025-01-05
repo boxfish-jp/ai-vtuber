@@ -16,7 +16,7 @@ const fetchAudioQuery = async (text: string): Promise<unknown> => {
 		const res = await fetch(url.toString(), {
 			method: "POST",
 		});
-		console.log("response1 status code: ", res.status);
+		//console.log("response1 status code: ", res.status);
 		return res.json();
 	} catch (error) {
 		throw new Error(`Failed to fetch synthesis: ${String(error)}`);

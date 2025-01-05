@@ -35,7 +35,6 @@ export class MakeAudio implements makeAudioType {
 
 	async process(text: string): Promise<void> {
 		const data = await createAudio(text);
-		console.log();
 		await play(data, text);
 	}
 }

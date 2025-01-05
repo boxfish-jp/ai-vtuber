@@ -88,7 +88,6 @@ export const createServer = (
 		});
 
 		socket.on("speak", (msg: string): void => {
-			console.log(msg);
 			speakStateChange(msg === "true");
 		});
 
