@@ -1,6 +1,6 @@
 import { sleep } from "../../lib/sleep.js";
 import type { LLM } from "../../llm/llm.js";
-import { getLatestChatSection } from "../db/chat_db.js";
+import { getLatestChatSection, makeLatestAsPointed } from "../db/chat_db.js";
 import { getAiState } from "../state/ai.js";
 import { getTalkState } from "../state/talk.js";
 import { getShouldAnswer } from "./shouldAnswer.js";
@@ -19,8 +19,9 @@ export async function auto(talk: LLM["talk"]) {
 			}
 		}
 
-		/*
 		if (talkState.silence && !aiState.talking) {
+			await makeLatestAsPointed();
+			/*
 			aiState.talking = true;
 			console.log("beginTalk");
 			const llmResponse = await beginTalk();
@@ -29,8 +30,8 @@ export async function auto(talk: LLM["talk"]) {
 			await action.speak(sendMsg);
 			sendMsg(" ");
 			aiState.talking = false;
+      */
 		}
-			*/
 
 		await sleep(1000);
 	}

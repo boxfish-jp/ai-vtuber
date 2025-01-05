@@ -49,4 +49,15 @@ export const makeAsPointed = async (unixTime: number): Promise<void> => {
 	});
 };
 
+export const makeLatestAsPointed = async (): Promise<void> => {
+	const maxUnixTime = await prismaClient.chat.findFirst({
+		orderBy: { unixTime: "desc" },
+		select: { unixTime: true },
+	});
+	if (!maxUnixTime) {
+		return;
+	}
+	await makeAsPointed(Number(maxUnixTime.unixTime));
+};
+
 const prismaClient = new PrismaClient();
