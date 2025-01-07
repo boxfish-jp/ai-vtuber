@@ -17,7 +17,7 @@ export const play = async (
 	});
 
 	if (!response.ok) {
-		throw new Error(` Failed to post ai_vtuber server:${response.statusText}`);
+		console.log(` Failed to post ai_vtuber server:${response.statusText}`);
 	}
 	try {
 		const url = `http://${endpointJson.audio.ip}:${endpointJson.audio.port}`;
