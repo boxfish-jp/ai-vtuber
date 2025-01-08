@@ -2,7 +2,7 @@ import { getAiState } from "../controller/state/ai.js";
 import { sleep } from "../lib/sleep.js";
 import { play } from "./play.js";
 import { splitSentences } from "./splitSentences.js";
-import { createAudio } from "./voicevox.js";
+import { VoicevoxAudio, type VoicevoxAudioType } from "./voicevox.js";
 
 export interface makeAudioType {
 	addQueue(text: string): Promise<void>;
@@ -25,14 +25,15 @@ export class MakeAudio implements makeAudioType {
 	async start() {
 		while (true) {
 			if (this.waitingQueue.length > 0) {
-				const audioQueue: Promise<[ArrayBuffer, string]>[] = [];
+				const audioQueue: VoicevoxAudioType[] = [];
 				for (const text of this.waitingQueue) {
-					audioQueue.push(Promise.all([createAudio(text), text]));
+					audioQueue.push(new VoicevoxAudio(text));
 				}
 				this.waitingQueue = [];
-				const values = await Promise.all(audioQueue);
-				for (const [audio, text] of values) {
-					await play(audio, text);
+				this._createAudios(audioQueue);
+				for (const audio of audioQueue) {
+					console.log("audio", audio.text);
+					await audio.play();
 				}
 				const aiState = getAiState();
 				aiState.talking = false;
@@ -41,8 +42,10 @@ export class MakeAudio implements makeAudioType {
 		}
 	}
 
-	async process(text: string): Promise<void> {
-		const data = await createAudio(text);
-		await play(data, text);
+	private async _createAudios(audioQueue: VoicevoxAudioType[]): Promise<void> {
+		for (const audio of audioQueue) {
+			audio.create();
+			await sleep(100);
+		}
 	}
 }

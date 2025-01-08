@@ -1,10 +1,37 @@
 import endpointJson from "../../../endpoint.json";
+import { sleep } from "../lib/sleep.js";
+import { play } from "./play.js";
 
-export const createAudio = async (text: string): Promise<ArrayBuffer> => {
-	const jsonBody = await fetchAudioQuery(text);
-	const audioData = await fetchSynthesis(text, jsonBody);
-	return audioData;
-};
+export interface VoicevoxAudioType {
+	text: string;
+	create(): Promise<void>;
+	play(): Promise<void>;
+}
+
+export class VoicevoxAudio implements VoicevoxAudioType {
+	private _text: string;
+	private _audioData: ArrayBuffer | null = null;
+
+	constructor(text: string) {
+		this._text = text;
+	}
+
+	get text(): string {
+		return this._text;
+	}
+
+	async create(): Promise<void> {
+		const jsonBody = await fetchAudioQuery(this._text);
+		this._audioData = await fetchSynthesis(this._text, jsonBody);
+	}
+
+	async play(): Promise<void> {
+		while (this._audioData === null) {
+			await sleep(100);
+		}
+		await play(this._audioData, this._text);
+	}
+}
 
 const fetchAudioQuery = async (text: string): Promise<unknown> => {
 	const url = new URL(
