@@ -24,17 +24,19 @@ export class MakeAudio implements makeAudioType {
 
 	async start() {
 		while (true) {
-			const audioQueue: Promise<[ArrayBuffer, string]>[] = [];
-			for (const text of this.waitingQueue) {
-				audioQueue.push(Promise.all([createAudio(text), text]));
+			if (this.waitingQueue.length > 0) {
+				const audioQueue: Promise<[ArrayBuffer, string]>[] = [];
+				for (const text of this.waitingQueue) {
+					audioQueue.push(Promise.all([createAudio(text), text]));
+				}
+				this.waitingQueue = [];
+				const values = await Promise.all(audioQueue);
+				for (const [audio, text] of values) {
+					await play(audio, text);
+				}
+				const aiState = getAiState();
+				aiState.talking = false;
 			}
-			this.waitingQueue = [];
-			const values = await Promise.all(audioQueue);
-			for (const [audio, text] of values) {
-				await play(audio, text);
-			}
-			const aiState = getAiState();
-			aiState.talking = false;
 			await sleep(1000);
 		}
 	}
