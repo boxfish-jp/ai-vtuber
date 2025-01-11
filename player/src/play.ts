@@ -7,7 +7,7 @@ export const play = async (audio: ArrayBuffer): Promise<void> => {
 	try {
 		const filePath = await saveAudio(audio);
 		console.log("play", filePath);
-		const command = `ffplay -autoexit -nodisp "${filePath}"`;
+		const command = `ffplay -autoexit -nodisp -volume 80 "${filePath}"`;
 		console.log("command: ", command);
 		await executeCommand(command);
 		deleteAudio(filePath);
