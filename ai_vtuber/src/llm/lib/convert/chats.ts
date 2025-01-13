@@ -1,28 +1,26 @@
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import type { Chat } from "@prisma/client";
 
-export type chatPromptType = (HumanMessage | AIMessage)[];
-export const convertToChatPrompt = (chats: Chat[]): chatPromptType => {
+export const convertToChatPrompt = (chats: Chat[]): string => {
 	if (chats.length <= 1) {
-		return [];
+		return "直前の会話履歴はありません";
 	}
 	const onlyHistory = chats.slice(0, -1);
-	const messages: (HumanMessage | AIMessage)[] = [];
+	const messages: string[] = [];
 	for (const chat of onlyHistory) {
 		switch (chat.who) {
 			case "fuguo":
-				messages.push(new HumanMessage(chat.message, { name: "fuguo" }));
+				messages.push(`ふぐお「${chat.message}」`);
 				break;
 			case "viewer":
-				messages.push(new HumanMessage(chat.message, { name: "viewer" }));
+				messages.push(`視聴者「${chat.message}」`);
 				break;
 			case "announce":
-				messages.push(new AIMessage(chat.message, { name: "announce" }));
+				messages.push(`アナウンス「${chat.message}」`);
 				break;
 			case "ai":
-				messages.push(new AIMessage(chat.message));
+				messages.push(`αちゃん「${chat.message}」`);
 				break;
 		}
 	}
-	return messages;
+	return messages.join("\n");
 };
