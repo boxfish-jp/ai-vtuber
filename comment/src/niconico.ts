@@ -14,53 +14,39 @@ export const niconico = async (userId: string) => {
 
 	new NicoliveClient({ liveId: nowliveId })
 		.on("chat", async (chatMessage: Chat) => {
-			console.log(chatMessage);
-			const response = await fetch(url, {
-				body: JSON.stringify({
-					who: "viewer",
-					chatText: chatMessage.content,
-					unixTime: new Date().getTime(),
-					point: false,
-				}),
-				method: "POST",
-				headers: new Headers({ "Content-Type": "application/json" }),
-			});
-			if (response.status !== 200) {
-				console.log(response);
-			}
+			fetchToAiVtuber("viewer", chatMessage.content);
 		})
 		.on("simpleNotification", async (notification) => {
-			const response = await fetch(url, {
-				body: JSON.stringify({
-					who: "announce",
-					chatText: notification.message.value,
-					unixTime: new Date().getTime(),
-					point: false,
-				}),
-				method: "POST",
-				headers: new Headers({ "Content-Type": "application/json" }),
-			});
-			if (response.status !== 200) {
-				console.log(response);
+			const message = notification.message.value;
+			if (message) {
+				fetchToAiVtuber("announce", notification.message.value);
 			}
 		})
 		.on("changeState", async (state) => {
 			const nusiCome = state.marque?.display?.operatorComment?.content;
 			if (nusiCome) {
-				const response = await fetch(url, {
-					body: JSON.stringify({
-						who: "fuguo",
-						chatText: nusiCome,
-						unixTime: new Date().getTime(),
-						point: false,
-					}),
-					method: "POST",
-					headers: new Headers({ "Content-Type": "application/json" }),
-				});
-				if (response.status !== 200) {
-					console.log(response);
-				}
+				fetchToAiVtuber("fuguo", nusiCome);
 			}
 		})
 		.connect();
+};
+
+const fetchToAiVtuber = async (who: string, chatMessage: string) => {
+	try {
+		const response = await fetch(url, {
+			body: JSON.stringify({
+				who: who,
+				chatText: chatMessage,
+				unixTime: new Date().getTime(),
+				point: false,
+			}),
+			method: "POST",
+			headers: new Headers({ "Content-Type": "application/json" }),
+		});
+		if (response.status !== 200) {
+			console.log(response);
+		}
+	} catch (e) {
+		console.log(e);
+	}
 };
