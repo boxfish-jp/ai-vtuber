@@ -49,7 +49,6 @@ export class LLM implements llmType {
 				chats: chatsPrompt,
 			});
 			const cleanedResponse = cleanLlmResponse(response);
-			this.addQueue(cleanedResponse);
 			if (cleanedResponse.length > 10) {
 				this.addQueue(cleanedResponse);
 			}
