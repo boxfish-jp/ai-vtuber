@@ -50,6 +50,9 @@ export class LLM implements llmType {
 			});
 			const cleanedResponse = cleanLlmResponse(response);
 			this.addQueue(cleanedResponse);
+			if (cleanedResponse.length > 10) {
+				this.addQueue(cleanedResponse);
+			}
 			return response;
 		} catch (e) {
 			console.log("error:", e);
