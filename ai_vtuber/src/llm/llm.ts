@@ -31,13 +31,12 @@ export class LLM implements llmType {
 		aiState.talking = true;
 		const chatsPrompt = convertToChatPrompt(chats);
 		const inputPrompt = convertToInputPrompt(chats, screenshotUrl);
-		const systemPrompt = getTalkSystemPrompt();
+		const systemPrompt = getTalkSystemPrompt(chatsPrompt);
 		const examplePrompt = await convertToExamplePrompt(
 			getTalkExamplePromptData(),
 		);
 		const prompt = ChatPromptTemplate.fromMessages([
-			["system", systemPrompt],
-			["placeholder", "{chats}"],
+			["system", "{system}"],
 			examplePrompt,
 			inputPrompt,
 		]);
@@ -46,7 +45,7 @@ export class LLM implements llmType {
 		const chain = prompt.pipe(gemini).pipe(parser);
 		try {
 			const response = await chain.invoke({
-				chats: chatsPrompt,
+				system: systemPrompt,
 			});
 			const cleanedResponse = cleanLlmResponse(response);
 			if (cleanedResponse.length > 10) {
