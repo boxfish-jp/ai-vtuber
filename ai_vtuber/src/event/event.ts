@@ -24,4 +24,18 @@ export class LiveEvent {
 		this.instruction = instruction;
 		this.fuguoSpeaking = fuguoSpeaking;
 	}
+
+	get isNeedApply(): boolean {
+		if (this.chat || this.fuguoSpeaking || this.instruction?.unixTime) {
+			return true;
+		}
+		return false;
+	}
+
+	get isNeedMakeActivity(): boolean {
+		if (this.chat || this.fuguoSpeaking) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -6,10 +6,10 @@ import { getAiState } from "./state/ai.js";
 
 const makeAudio = new MakeAudio();
 eventServer(async (event) => {
-	if (event.chat || event.fuguoSpeaking || event.instruction?.unixTime) {
+	if (event.isNeedApply) {
 		await applyEvent(event);
 	}
-	if (event.fuguoSpeaking || event.chat?.who === "ai") {
+	if (!event.isNeedMakeActivity) {
 		return;
 	}
 	const activity = await makeActivity(event);
