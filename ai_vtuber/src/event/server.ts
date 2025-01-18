@@ -58,7 +58,9 @@ const ioServer = new Server(server as HttpServer, {
 	},
 });
 
-export const eventServer = (onNewEvent: (event: LiveEvent) => void) => {
+export const eventServer = (
+	onNewEvent: (event: LiveEvent) => Promise<void>,
+) => {
 	eventListener = onNewEvent;
 	ioServer.on("connection", (socket) => {
 		socket.on("chat", (msg: string) => {

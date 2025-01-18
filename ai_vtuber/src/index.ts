@@ -1,13 +1,21 @@
-import { ChatController } from "./chat_controller/controller.js";
-import { LLM, type llmType } from "./llm/llm.js";
-import { MakeAudio, type makeAudioType } from "./make_audio/make_audio.js";
-import { createServer } from "./server/server.js";
+import { applyEvent, makeActivity } from "./activity/activity.js";
+import { talk } from "./agents/talk/talk.js";
+import { eventServer } from "./event/server.js";
+import { MakeAudio } from "./make_audio/make_audio.js";
+import { getAiState } from "./state/ai.js";
 
-const makeAudio: makeAudioType = new MakeAudio();
-const llm: llmType = new LLM(makeAudio.addQueue.bind(makeAudio));
-const controller: ChatController = new ChatController(llm.talk.bind(llm));
-createServer(
-	controller.addChat.bind(controller),
-	controller.speakStateChange.bind(controller),
-	controller.talkToAi.bind(controller),
-);
+const makeAudio = new MakeAudio();
+eventServer(async (event) => {
+	if (event.chat || event.fuguoSpeaking || event.instruction?.unixTime) {
+		await applyEvent(event);
+	}
+	if (event.fuguoSpeaking || event.chat?.who === "ai") {
+		return;
+	}
+	const activity = await makeActivity(event);
+	const response = await talk(activity);
+	if (!response) return;
+	const aiState = getAiState();
+	aiState.setTalking();
+	makeAudio.addQueue(response);
+});

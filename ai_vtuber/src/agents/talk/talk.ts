@@ -1,62 +1,45 @@
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import type { Chat } from "@prisma/client";
-import type { makeAudioType } from "../make_audio/make_audio.js";
-import { getAiState } from "../state/ai.js";
-import { cleanLlmResponse } from "./lib/cleanLlmResponse.js";
-import { convertToChatPrompt } from "./lib/convert/chats.js";
+import type { Activity } from "../../activity/activity.js";
+import { gemini } from "../../lib/model.js";
+import { getAiState } from "../../state/ai.js";
+import { cleanLlmResponse } from "../llm_response_cleaner.js";
 import { convertToExamplePrompt } from "./lib/convert/example.js";
-import { convertToInputPrompt } from "./lib/convert/input.js";
-import { gemini } from "./lib/model.js";
 import {
 	getTalkExamplePromptData,
 	getTalkSystemPrompt,
 } from "./prompt/talk.js";
 
-export interface llmType {
-	talk(chats: Chat[], screenshotUrl: string): Promise<string>;
-}
-
-export class LLM implements llmType {
-	private readonly addQueue: makeAudioType["addQueue"];
-	constructor(addQueue: makeAudioType["addQueue"]) {
-		this.addQueue = addQueue;
+export const talk = async (activity: Activity): Promise<string | undefined> => {
+	const aiState = getAiState();
+	if (aiState.talking) {
+		return undefined;
 	}
+	const chatHistoryPrompt = activity.chatHistoryPrompt;
+	const inputPrompt = activity.inputPrompt;
+	const systemPrompt = getTalkSystemPrompt(chatHistoryPrompt);
+	const examplePrompt = await convertToExamplePrompt(
+		getTalkExamplePromptData(),
+	);
+	const prompt = ChatPromptTemplate.fromMessages([
+		["system", "{system}"],
+		examplePrompt,
+		inputPrompt,
+	]);
 
-	async talk(chats: Chat[], screenshotUrl: string): Promise<string> {
-		const aiState = getAiState();
-		if (aiState.talking) {
-			return "思考中です。";
+	const parser = new StringOutputParser();
+	const chain = prompt.pipe(gemini).pipe(parser);
+	try {
+		const response = await chain.invoke({
+			system: systemPrompt,
+		});
+		const cleanedResponse = cleanLlmResponse(response);
+		if (cleanedResponse.length > 10) {
+			return undefined;
 		}
-		aiState.talking = true;
-		const chatsPrompt = convertToChatPrompt(chats);
-		const inputPrompt = convertToInputPrompt(chats, screenshotUrl);
-		const systemPrompt = getTalkSystemPrompt(chatsPrompt);
-		const examplePrompt = await convertToExamplePrompt(
-			getTalkExamplePromptData(),
-		);
-		const prompt = ChatPromptTemplate.fromMessages([
-			["system", "{system}"],
-			examplePrompt,
-			inputPrompt,
-		]);
-
-		const parser = new StringOutputParser();
-		const chain = prompt.pipe(gemini).pipe(parser);
-		try {
-			const response = await chain.invoke({
-				system: systemPrompt,
-			});
-			const cleanedResponse = cleanLlmResponse(response);
-			if (cleanedResponse.length > 10) {
-				this.addQueue(cleanedResponse);
-			}
-			return response;
-		} catch (e) {
-			console.log("error:", e);
-			const response = "思考が停止しました。";
-			this.addQueue(response);
-			return response;
-		}
+		return cleanedResponse;
+	} catch (e) {
+		console.log("error:", e);
+		return "思考が停止しました。";
 	}
-}
+};

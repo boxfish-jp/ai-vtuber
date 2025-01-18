@@ -1,6 +1,6 @@
 import { hc } from "hono/client";
 import endpointJson from "../../../endpoint.json";
-import type { appChatPostType } from "../server/server.js";
+import type { appChatPostType } from "../event/server.js";
 
 export const play = async (
 	audioData: ArrayBuffer,
@@ -10,7 +10,7 @@ export const play = async (
 	const response = await hc<appChatPostType>(url).chat.$post({
 		json: {
 			who: "ai",
-			chatText: text,
+			content: text,
 			unixTime: new Date().getTime(),
 			point: false,
 		},

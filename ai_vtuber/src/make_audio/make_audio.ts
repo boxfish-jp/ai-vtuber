@@ -4,11 +4,7 @@ import { play } from "./play.js";
 import { splitSentences } from "./splitSentences.js";
 import { VoicevoxAudio, type VoicevoxAudioType } from "./voicevox.js";
 
-export interface makeAudioType {
-	addQueue(text: string): Promise<void>;
-}
-
-export class MakeAudio implements makeAudioType {
+export class MakeAudio {
 	private waitingQueue: string[] = [];
 
 	constructor() {
@@ -36,7 +32,7 @@ export class MakeAudio implements makeAudioType {
 					await audio.play();
 				}
 				const aiState = getAiState();
-				aiState.talking = false;
+				aiState.setTalking();
 			}
 			await sleep(1000);
 		}
