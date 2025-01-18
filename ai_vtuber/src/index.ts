@@ -1,4 +1,4 @@
-import { applyEvent, makeActivity } from "./activity/activity.js";
+import { applyEvent, makeActivity } from "./activity/handleEvent.js";
 import { talk } from "./agents/talk/talk.js";
 import { eventServer } from "./event/server.js";
 import { MakeAudio } from "./make_audio/make_audio.js";
