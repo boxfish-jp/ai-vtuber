@@ -22,7 +22,14 @@ export const makeActivity = async (
 	const workTheme = new WorkTheme();
 	const spotify = new Spotify();
 	const songName = await spotify.getListteningSongName();
-	return new Activity(songName, chatHistory, imageUrl, workTheme.theme);
+	const instruction = event?.instruction?.type;
+	return new Activity(
+		songName,
+		chatHistory,
+		imageUrl,
+		workTheme.theme,
+		instruction,
+	);
 };
 
 export const applyEvent = async (event: LiveEvent): Promise<void> => {

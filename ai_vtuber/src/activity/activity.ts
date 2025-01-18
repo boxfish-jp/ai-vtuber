@@ -1,21 +1,25 @@
 import { HumanMessage } from "@langchain/core/messages";
-import type { chatEvent } from "../event/event.js";
+import type { chatEvent, instructionEvent } from "../event/event.js";
 
 export class Activity {
 	private _listeningSong = "";
 	private _chatHistory: chatEvent[] = [];
 	private _screenShotUrl = "";
 	private _workTheme = "";
+	private _instruction: instructionEvent["type"] | undefined = undefined;
+
 	constructor(
 		listeningSong: string,
 		chatHistory: chatEvent[],
 		screenShotUrl: string,
 		workTheme: string,
+		instruction: instructionEvent["type"] | undefined,
 	) {
 		this._listeningSong = listeningSong;
 		this._chatHistory = chatHistory;
 		this._screenShotUrl = screenShotUrl;
 		this._workTheme = workTheme;
+		this._instruction = instruction;
 	}
 
 	get chatHistory(): chatEvent[] {

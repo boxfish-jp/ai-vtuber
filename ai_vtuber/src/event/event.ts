@@ -5,7 +5,7 @@ export interface chatEvent {
 	point: boolean;
 }
 
-interface instructionEvent {
+export interface instructionEvent {
 	type: "talk" | "work_theme" | "afk" | "back" | "grade";
 	unixTime: number;
 	needScreenshot: boolean;
