@@ -1,4 +1,4 @@
-interface chatEvent {
+export interface chatEvent {
 	who: "ai" | "fuguo" | "viewer" | "info";
 	content: string;
 	unixTime: number;

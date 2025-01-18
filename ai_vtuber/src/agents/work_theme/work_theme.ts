@@ -1,10 +1,10 @@
-export class workTheme {
+export class WorkTheme {
 	private _theme = "";
 	private checking = false;
 
 	get theme(): string {
 		return this._theme;
 	}
-
-	setTheme;
 }
+
+export const workTheme = new WorkTheme();
