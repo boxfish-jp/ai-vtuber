@@ -3,7 +3,6 @@ import type { LLM } from "../llm/llm.js";
 import { getFuguoState } from "../state/fuguo.js";
 import { getViewerState } from "../state/viewer.js";
 import { takeScreenshot } from "../take_screenShot/take_screenshot.js";
-import { auto } from "./auto/auto.js";
 import {
 	getLatestChatSection,
 	insertChatDb,
@@ -15,7 +14,6 @@ export class ChatController {
 
 	constructor(talk: LLM["talk"]) {
 		this.talk = talk;
-		auto(talk);
 	}
 	async addChat(
 		unixTime: number,
