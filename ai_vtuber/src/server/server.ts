@@ -3,10 +3,9 @@ import { serve } from "@hono/node-server";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { Server } from "socket.io";
-import type { a } from "vitest/dist/chunks/suite.B2jumIFP.js";
 import { z } from "zod";
 import endpointJson from "../../../endpoint.json";
-import type { controllerType } from "../controller/controller.js";
+import type { ChatController } from "../chat_controller/controller.js";
 
 const socketServerChatSchema = z.object({
 	who: z.enum(["ai", "fuguo", "viewer", "announce"]),
@@ -20,7 +19,7 @@ const socketServerTalkToAiSchema = z.object({
 	needScreenshot: z.boolean(),
 });
 
-let addNewChat: addNewChat = (receivedMessage: {
+let addNewChat = (receivedMessage: {
 	unixTime: number;
 	who: "ai" | "fuguo" | "viewer" | "announce";
 	chatText: string;
@@ -63,9 +62,9 @@ const ioServer = new Server(server as HttpServer, {
 });
 
 export const createServer = (
-	addChat: controllerType["addChat"],
-	speakStateChange: controllerType["speakStateChange"],
-	talkToAi: controllerType["talkToAi"],
+	addChat: ChatController["addChat"],
+	speakStateChange: ChatController["speakStateChange"],
+	talkToAi: ChatController["talkToAi"],
 ) => {
 	addNewChat = (receivedMessage: {
 		unixTime: number;

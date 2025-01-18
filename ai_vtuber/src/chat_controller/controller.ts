@@ -1,5 +1,7 @@
 import type { Chat } from "@prisma/client";
 import type { LLM } from "../llm/llm.js";
+import { getFuguoState } from "../state/fuguo.js";
+import { getViewerState } from "../state/viewer.js";
 import { takeScreenshot } from "../take_screenShot/take_screenshot.js";
 import { auto } from "./auto/auto.js";
 import {
@@ -7,26 +9,8 @@ import {
 	insertChatDb,
 	makeAsPointed,
 } from "./db/chat_db.js";
-import { getFuguoState } from "./state/fuguo.js";
-import { getViewerState } from "./state/viewer.js";
 
-export interface controllerType {
-	addChat(
-		unixTime: number,
-		who: "ai" | "fuguo" | "viewer" | "announce",
-		chatText: string,
-		point: boolean,
-	): Promise<Chat>;
-
-	speakStateChange(speaking: boolean): boolean;
-
-	talkToAi(
-		unixTime: number,
-		needScreenShot: boolean,
-	): Promise<{ chats: Chat[]; url: string }>;
-}
-
-export class Controller implements controllerType {
+export class ChatController {
 	private readonly talk: LLM["talk"];
 
 	constructor(talk: LLM["talk"]) {

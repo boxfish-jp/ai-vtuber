@@ -1,8 +1,8 @@
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import type { Chat } from "@prisma/client";
-import { getAiState } from "../controller/state/ai.js";
 import type { makeAudioType } from "../make_audio/make_audio.js";
+import { getAiState } from "../state/ai.js";
 import { cleanLlmResponse } from "./lib/cleanLlmResponse.js";
 import { convertToChatPrompt } from "./lib/convert/chats.js";
 import { convertToExamplePrompt } from "./lib/convert/example.js";

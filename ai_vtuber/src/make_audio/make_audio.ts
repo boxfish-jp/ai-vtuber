@@ -1,5 +1,5 @@
-import { getAiState } from "../controller/state/ai.js";
 import { sleep } from "../lib/sleep.js";
+import { getAiState } from "../state/ai.js";
 import { play } from "./play.js";
 import { splitSentences } from "./splitSentences.js";
 import { VoicevoxAudio, type VoicevoxAudioType } from "./voicevox.js";
