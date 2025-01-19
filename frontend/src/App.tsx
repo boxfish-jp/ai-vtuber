@@ -102,7 +102,7 @@ function App() {
 																</TableCell>
 																<TableCell>{chat.unixTime}</TableCell>
 																<TableCell>{chat.who}</TableCell>
-																<TableCell>{chat.chatText}</TableCell>
+																<TableCell>{chat.content}</TableCell>
 															</TableRow>
 														))}
 														<TableRow ref={listEndRef} />

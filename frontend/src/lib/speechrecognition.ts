@@ -11,7 +11,7 @@ export const speechRecognition = (
 		const unixTime = new Date().getTime();
 		const jsonData = JSON.stringify({
 			who: "fuguo",
-			chatText: content,
+			content: content,
 			unixTime,
 			point: false,
 		});

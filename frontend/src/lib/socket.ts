@@ -3,7 +3,7 @@ import endpointJson from "../../../endpoint.json";
 
 export interface socketServerChatType {
 	who: "ai" | "fuguo" | "viewer" | "announce";
-	chatText: string;
+	content: string;
 	unixTime: number;
 	point: boolean;
 }
@@ -41,6 +41,7 @@ class SocketControler implements SocketControlerType {
 
 	watchChat(callback: (newChat: socketServerChatType) => void): void {
 		this._socket.on("chat", (event: string) => {
+			console.log(event);
 			const chat = JSON.parse(event) as socketServerChatType;
 			console.log(chat);
 			callback(chat);
