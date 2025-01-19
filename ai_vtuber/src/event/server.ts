@@ -66,18 +66,12 @@ export const eventServer = (
 		socket.on("chat", (msg: string) => {
 			const receivedMessage = chatEventSchema.parse(JSON.parse(msg));
 			const newEvent = new LiveEvent(receivedMessage, undefined, undefined);
+			ioServer.emit("chat", JSON.stringify(receivedMessage));
 			eventListener(newEvent);
 		});
 
 		socket.on("speak", (msg: string): void => {
 			const newEvent = new LiveEvent(undefined, undefined, msg === "true");
-			eventListener(newEvent);
-		});
-
-		socket.on("start", (msg: string): void => {
-			const instruction = instructionEventSchema.parse(JSON.parse(msg));
-			console.log("receivedMessage");
-			const newEvent = new LiveEvent(undefined, instruction, undefined);
 			eventListener(newEvent);
 		});
 	});
