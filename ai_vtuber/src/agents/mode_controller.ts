@@ -51,16 +51,12 @@ export class ModeController {
 		let selectedTool: DynamicStructuredTool;
 		switch (result.tool_calls[0].name) {
 			case "cliTool":
-				selectedTool = this.cliTool;
-				break;
+				return getCli();
 			case "remineder":
-				selectedTool = this.remineder;
-				break;
+				return getRemineder();
 			default:
 				throw new Error("tool not found");
 		}
-		const toolMessage = await selectedTool.invoke(result.tool_calls[0]);
-		return toolMessage;
 	};
 
 	private cliTool = tool(
