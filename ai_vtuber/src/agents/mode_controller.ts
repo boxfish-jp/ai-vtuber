@@ -10,6 +10,7 @@ import { getCli } from "./cli/cli.js";
 import { getGrade } from "./grade/grade.js";
 import type { mode } from "./mode.js";
 import { getRemineder } from "./remineder/remineder.js";
+import { getSpotify } from "./spotify/spotify.js";
 import { getTalk } from "./talk/talk.js";
 import { getWorkTheme } from "./work_theme/work_theme.js";
 
@@ -53,7 +54,7 @@ export class ModeController {
 		]);
 		const model = await getlocalModel();
 		const modelWithTools = prompt.pipe(
-			model.bindTools([this.cliTool, this.remineder]),
+			model.bindTools([this.cliTool, this.remineder, this.spotify]),
 		);
 		const result = await modelWithTools.invoke({ system: systemPrompt });
 		if (result.tool_calls === undefined || result.tool_calls.length === 0) {
@@ -64,14 +65,16 @@ export class ModeController {
 				return getCli();
 			case "remineder":
 				return getRemineder();
+			case "spotify":
+				return getSpotify();
 			default:
 				return undefined;
 		}
 	};
 
 	private cliTool = tool(
-		(): Agent => {
-			return getCli();
+		(): void => {
+			return;
 		},
 		{
 			name: "cliTool",
@@ -82,12 +85,23 @@ export class ModeController {
 	);
 
 	private remineder = tool(
-		(): Agent => {
-			return getRemineder();
+		(): void => {
+			return;
 		},
 		{
 			name: "remineder",
 			description: "リマインダー作成専門のLLMエージェントです。",
+			schema: z.object({}),
+		},
+	);
+
+	private spotify = tool(
+		() => {
+			return;
+		},
+		{
+			name: "spotify",
+			description: "音楽再生専門のLLMエージェントです。",
 			schema: z.object({}),
 		},
 	);
