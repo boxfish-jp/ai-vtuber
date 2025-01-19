@@ -22,6 +22,10 @@ export class Activity {
 		this._instruction = instruction;
 	}
 
+	get instruction() {
+		return this._instruction;
+	}
+
 	get chatHistory(): chatEvent[] {
 		return this._chatHistory;
 	}
