@@ -1,4 +1,5 @@
-import { type DynamicStructuredTool, tool } from "@langchain/core/tools";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import type { Activity } from "../activity/activity.js";
 import type { instructionEvent } from "../event/event.js";
@@ -15,7 +16,7 @@ import { getWorkTheme } from "./work_theme/work_theme.js";
 export class ModeController {
 	private currentMode: mode = "talk";
 
-	async classify(activity: Activity): Promise<Agent> {
+	async classify(activity: Activity): Promise<Agent | undefined> {
 		if (activity.instruction) {
 			return this.instructionClassify(activity.instruction);
 		}
@@ -41,21 +42,30 @@ export class ModeController {
 		}
 	};
 
-	private autoClassify = async (activity: Activity): Promise<Agent> => {
+	private autoClassify = async (
+		activity: Activity,
+	): Promise<Agent | undefined> => {
+		const systemPrompt =
+			"あなたは有能なアシスタントです。ユーザーから「リマインダーを設定する」「開発ツールを開く」「特定のwebサイトを開く」作業を頼まれた場合は何があっても必ずツールを呼び出してください。あなたはその作業について詳細をユーザーに聞くようなことはしなくて構いません。以下がこれまでの会話履歴です。";
+		const prompt = ChatPromptTemplate.fromMessages([
+			["system", "{system}"],
+			activity.inputPrompt,
+		]);
 		const model = await getlocalModel();
-		const modelWithTools = model.bindTools([this.cliTool, this.remineder]);
-		const result = await modelWithTools.invoke(activity.chatHistoryPrompt);
+		const modelWithTools = prompt.pipe(
+			model.bindTools([this.cliTool, this.remineder]),
+		);
+		const result = await modelWithTools.invoke({ system: systemPrompt });
 		if (result.tool_calls === undefined || result.tool_calls.length === 0) {
-			return getTalk();
+			return undefined;
 		}
-		let selectedTool: DynamicStructuredTool;
 		switch (result.tool_calls[0].name) {
 			case "cliTool":
 				return getCli();
 			case "remineder":
 				return getRemineder();
 			default:
-				throw new Error("tool not found");
+				return undefined;
 		}
 	};
 
@@ -66,7 +76,7 @@ export class ModeController {
 		{
 			name: "cliTool",
 			description:
-				"このツールでできることは、ブラウザで特定のページを開きユーザーにそのページを閲覧させる、特定のディレクトリにてvscodeやNeovim,Lazygitを開く。これはLLMエージェントなので、このツールを呼び出しさえすれば、自動でユーザーに作業内容を確認し、cliコマンドが実行されます。",
+				"ブラウザで特定のページを開きユーザーにそのページを閲覧させる、特定のディレクトリにてvscodeやNeovim,Lazygitを開くといった処理を専門に担うLLMエージェントです。",
 			schema: z.object({}),
 		},
 	);
@@ -77,8 +87,7 @@ export class ModeController {
 		},
 		{
 			name: "remineder",
-			description:
-				"このツールでできることは、特定の時間になったら、ユーザーにお知らせするリマインダーを作成することができます。これはLLMエージェントなので、このツールを呼び出しさえすれば、自動でユーザーにリマインダーの内容とその時間を確認し、その確認内容の通りにリマインダーが実行されます。",
+			description: "リマインダー作成専門のLLMエージェントです。",
 			schema: z.object({}),
 		},
 	);
