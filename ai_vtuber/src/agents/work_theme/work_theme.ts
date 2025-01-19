@@ -110,4 +110,10 @@ export class WorkTheme implements Agent {
 	);
 }
 
-export const workTheme = new WorkTheme();
+let workTheme: WorkTheme | undefined = undefined;
+export const getWorkTheme = (): WorkTheme => {
+	if (!workTheme) {
+		workTheme = new WorkTheme();
+	}
+	return workTheme;
+};

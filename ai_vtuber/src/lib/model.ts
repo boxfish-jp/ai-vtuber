@@ -1,10 +1,10 @@
-import { ChatOllama } from "@langchain/community/chat_models/ollama";
 import { ChatVertexAI } from "@langchain/google-vertexai-web";
+import { ChatOllama } from "@langchain/ollama";
 
 export const getlocalModel = async () => {
 	if (!_localModel) {
 		_localModel = new ChatOllama({
-			model: "gemma_9b",
+			model: "qwen2.5:3b",
 		});
 	}
 	return _localModel;

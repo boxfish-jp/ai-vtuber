@@ -2,25 +2,14 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import type { Activity } from "../../activity/activity.js";
 import { gemini } from "../../lib/model.js";
-import type { Agent } from "../agent.js";
 import { cleanLlmResponse } from "../llm_response_cleaner.js";
-import { convertToExamplePrompt } from "./lib/convert/example.js";
-import {
-	getTalkExamplePromptData,
-	getTalkSystemPrompt,
-} from "./prompt/talk.js";
 
-export class Talk implements Agent {
+export class Cli {
 	async service(activity: Activity): Promise<string> {
-		const chatHistoryPrompt = activity.chatHistoryPrompt;
+		const ChatHistoryPrompt = activity.chatHistoryPrompt;
 		const inputPrompt = activity.inputPrompt;
-		const systemPrompt = getTalkSystemPrompt(chatHistoryPrompt);
-		const examplePrompt = await convertToExamplePrompt(
-			getTalkExamplePromptData(),
-		);
 		const prompt = ChatPromptTemplate.fromMessages([
 			["system", "{system}"],
-			examplePrompt,
 			inputPrompt,
 		]);
 
@@ -28,13 +17,9 @@ export class Talk implements Agent {
 		const chain = prompt.pipe(gemini).pipe(parser);
 		try {
 			const response = await chain.invoke({
-				system: systemPrompt,
+				system: "",
 			});
-			const cleanedResponse = cleanLlmResponse(response);
-			if (cleanedResponse.length > 10) {
-				return "";
-			}
-			return cleanedResponse;
+			return cleanLlmResponse(response);
 		} catch (e) {
 			console.log("error:", e);
 			return "思考が停止しました。";
@@ -42,11 +27,10 @@ export class Talk implements Agent {
 	}
 }
 
-let talk: Talk | undefined = undefined;
-
-export const getTalk = (): Talk => {
-	if (!talk) {
-		talk = new Talk();
+let cli: Cli | undefined = undefined;
+export const getCli = (): Cli => {
+	if (!cli) {
+		cli = new Cli();
 	}
-	return talk;
+	return cli;
 };

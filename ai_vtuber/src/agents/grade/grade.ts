@@ -27,3 +27,11 @@ export class Grade implements Agent {
 		}
 	}
 }
+
+let grade: Grade | undefined = undefined;
+export const getGrade = (): Grade => {
+	if (!grade) {
+		grade = new Grade();
+	}
+	return grade;
+};
