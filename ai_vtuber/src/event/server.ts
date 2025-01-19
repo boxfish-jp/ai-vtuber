@@ -76,7 +76,6 @@ export const eventServer = (
 		});
 
 		socket.on("instruction", (msg: string): void => {
-			console.log(msg);
 			const receivedMessage = instructionEventSchema.parse(JSON.parse(msg));
 			const instructionEvent = {
 				type: receivedMessage.type,
