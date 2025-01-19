@@ -33,7 +33,7 @@ export class LiveEvent {
 	}
 
 	get isNeedMakeActivity(): boolean {
-		if (this.chat || this.fuguoSpeaking) {
+		if (this.fuguoSpeaking !== undefined || this.chat?.who === "ai") {
 			return false;
 		}
 		return true;
