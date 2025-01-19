@@ -51,8 +51,9 @@ function App() {
 			title: "AIに送信しました",
 		});
 		sendEvent(
-			"start",
+			"instruction",
 			JSON.stringify({
+				type: "talk",
 				unixTime: data.unixTime,
 				needScreenshot: data.needScreenshot,
 			}),

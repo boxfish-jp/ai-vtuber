@@ -16,7 +16,7 @@ const chatEventSchema = z.object({
 
 const instructionEventSchema = z.object({
 	type: z.enum(["talk", "work_theme", "afk", "back", "grade"]),
-	unixTime: z.number(),
+	unixTime: z.string(),
 	needScreenshot: z.boolean(),
 });
 
@@ -72,6 +72,18 @@ export const eventServer = (
 
 		socket.on("speak", (msg: string): void => {
 			const newEvent = new LiveEvent(undefined, undefined, msg === "true");
+			eventListener(newEvent);
+		});
+
+		socket.on("instruction", (msg: string): void => {
+			console.log(msg);
+			const receivedMessage = instructionEventSchema.parse(JSON.parse(msg));
+			const instructionEvent = {
+				type: receivedMessage.type,
+				unixTime: Number(receivedMessage.unixTime),
+				needScreenshot: receivedMessage.needScreenshot,
+			};
+			const newEvent = new LiveEvent(undefined, instructionEvent, undefined);
 			eventListener(newEvent);
 		});
 	});
