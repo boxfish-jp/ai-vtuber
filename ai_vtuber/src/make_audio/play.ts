@@ -30,9 +30,9 @@ export const play = async (
 		});
 
 		if (!response.ok) {
-			throw new Error(`Failed to post audio data: ${response.statusText}`);
+			console.log(`Failed to post audio data: ${response.statusText}`);
 		}
 	} catch (e) {
-		throw new Error(`Failed to play audio: ${String(e)}`);
+		console.log(`Failed to play audio: ${String(e)}`);
 	}
 };
