@@ -11,12 +11,26 @@ eventServer(async (event) => {
 		await applyEvent(event);
 	}
 	if (!event.isNeedMakeActivity) {
+		console.log("no need to make activity");
 		return;
 	}
+	console.log("chat", event);
 	const activity = await makeActivity(event);
 	const agent = await modeController.classify(activity);
+	if (!agent) {
+		console.log("no agent");
+		return;
+	}
 	const response = await agent.service(activity);
+	if (response.text.length < 10) {
+		return;
+	}
+	if (response.completed) {
+		modeController.resetMode();
+	}
+
+	console.log("response", response);
 	const aiState = getAiState();
 	aiState.setTalking();
-	makeAudio.addQueue(response);
+	makeAudio.addQueue(response.text);
 });

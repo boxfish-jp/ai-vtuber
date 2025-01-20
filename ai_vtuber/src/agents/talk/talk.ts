@@ -2,7 +2,7 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import type { Activity } from "../../activity/activity.js";
 import { gemini } from "../../lib/model.js";
-import type { Agent } from "../agent.js";
+import type { Agent, AgentResponse } from "../agent.js";
 import { cleanLlmResponse } from "../llm_response_cleaner.js";
 import { convertToExamplePrompt } from "./lib/convert/example.js";
 import {
@@ -11,9 +11,11 @@ import {
 } from "./prompt/talk.js";
 
 export class Talk implements Agent {
-	async service(activity: Activity): Promise<string> {
+	async service(activity: Activity): Promise<AgentResponse> {
 		const chatHistoryPrompt = activity.chatHistoryPrompt;
+		console.log("chatHistoryPrompt", chatHistoryPrompt);
 		const inputPrompt = activity.inputPrompt;
+		console.log("input", inputPrompt);
 		const systemPrompt = getTalkSystemPrompt(chatHistoryPrompt);
 		const examplePrompt = await convertToExamplePrompt(
 			getTalkExamplePromptData(),
@@ -30,14 +32,16 @@ export class Talk implements Agent {
 			const response = await chain.invoke({
 				system: systemPrompt,
 			});
-			const cleanedResponse = cleanLlmResponse(response);
-			if (cleanedResponse.length > 10) {
-				return "";
-			}
-			return cleanedResponse;
+			return {
+				text: cleanLlmResponse(response),
+				completed: true,
+			};
 		} catch (e) {
 			console.log("error:", e);
-			return "思考が停止しました。";
+			return {
+				text: "思考が停止しました。",
+				completed: true,
+			};
 		}
 	}
 }

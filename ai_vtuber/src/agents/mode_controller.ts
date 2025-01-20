@@ -25,6 +25,10 @@ export class ModeController {
 		return agent;
 	}
 
+	resetMode(): void {
+		this.currentMode = "talk";
+	}
+
 	private instructionClassify = (
 		instruction: instructionEvent["type"],
 	): Agent => {
@@ -62,10 +66,13 @@ export class ModeController {
 		}
 		switch (result.tool_calls[0].name) {
 			case "cliTool":
+				this.currentMode = "cli";
 				return getCli();
 			case "remineder":
+				this.currentMode = "remineder";
 				return getRemineder();
 			case "spotify":
+				this.currentMode = "spotify";
 				return getSpotify();
 			default:
 				return undefined;

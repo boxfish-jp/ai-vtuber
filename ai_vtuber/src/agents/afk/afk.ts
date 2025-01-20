@@ -1,8 +1,9 @@
-import type { Agent } from "../agent.js";
+import type { Activity } from "../../activity/activity.js";
+import type { Agent, AgentResponse } from "../agent.js";
 
 export class Afk implements Agent {
-	async service(): Promise<string> {
-		return "AFKモードになりました。";
+	async service(activity: Activity): Promise<AgentResponse> {
+		return { text: "AFKモードになりました。", completed: true };
 	}
 }
 

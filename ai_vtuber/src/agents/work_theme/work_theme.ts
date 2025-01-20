@@ -3,7 +3,7 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import type { Activity } from "../../activity/activity.js";
 import { gemini } from "../../lib/model.js";
-import type { Agent } from "../agent.js";
+import type { Agent, AgentResponse } from "../agent.js";
 import { cleanLlmResponse } from "../llm_response_cleaner.js";
 import { workThemeSystemPrompt } from "./prompt.js";
 
@@ -15,7 +15,7 @@ export class WorkTheme implements Agent {
 		return this._theme;
 	}
 
-	async service(activity: Activity): Promise<string> {
+	async service(activity: Activity): Promise<AgentResponse> {
 		if (this.checking) {
 			return await this.check(activity);
 		}
@@ -40,16 +40,31 @@ export class WorkTheme implements Agent {
 			});
 			if (response.tool_calls?.length) {
 				const toolMessage = await this.affect.invoke(response.tool_calls[0]);
-				return toolMessage;
+				return {
+					text:
+						typeof response.content === "string"
+							? cleanLlmResponse(toolMessage.content)
+							: "",
+					completed: true,
+				};
 			}
-			return cleanLlmResponse(response.text);
+			return {
+				text:
+					typeof response.content === "string"
+						? cleanLlmResponse(response.content)
+						: "",
+				completed: true,
+			};
 		} catch (e) {
 			console.log("error:", e);
-			return "思考が停止しました。";
+			return {
+				text: "思考が停止しました。",
+				completed: true,
+			};
 		}
 	}
 
-	private async check(activity: Activity) {
+	private async check(activity: Activity): Promise<AgentResponse> {
 		const chatHistoryPrompt = activity.chatHistoryPrompt;
 		const inputPrompt = activity.inputPrompt;
 		const systemPrompt = workThemeSystemPrompt(chatHistoryPrompt);
@@ -67,12 +82,18 @@ export class WorkTheme implements Agent {
 			});
 			if (response.tool_calls?.length) {
 				const toolMessage = await this.affect.invoke(response.tool_calls[0]);
-				return toolMessage;
+				return { text: toolMessage.content, completed: true };
 			}
-			return cleanLlmResponse(response.text);
+			return {
+				text:
+					typeof response.content === "string"
+						? cleanLlmResponse(response.content)
+						: "",
+				completed: true,
+			};
 		} catch (e) {
 			console.log("error:", e);
-			return "思考が停止しました。";
+			return { text: "思考が停止しました。", completed: false };
 		}
 	}
 
@@ -92,7 +113,7 @@ export class WorkTheme implements Agent {
 	);
 
 	private confirm = tool(
-		({ input }: { input: string }): string => {
+		(): string => {
 			if (this.checking !== undefined) {
 				this._theme = this.checking;
 				this.checking = undefined;
