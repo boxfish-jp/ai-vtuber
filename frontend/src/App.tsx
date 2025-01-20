@@ -19,8 +19,10 @@ import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
 import { sendEvent, type socketServerChatType, watchChat } from "./lib/socket";
 import { speechRecognition } from "./lib/speechrecognition";
+import { Label } from "@radix-ui/react-label";
 
 const formSchema = z.object({
+	type: z.enum(["talk", "work_theme", "afk", "back"]).default("talk"),
 	unixTime: z.string(),
 	needScreenshot: z.boolean().default(false),
 });
@@ -53,12 +55,13 @@ function App() {
 		sendEvent(
 			"instruction",
 			JSON.stringify({
-				type: "talk",
+				type: data.type,
 				unixTime: data.unixTime,
 				needScreenshot: data.needScreenshot,
 			}),
 		);
 		form.setValue("needScreenshot", false);
+		form.setValue("type", "talk");
 	};
 
 	return (
@@ -116,25 +119,48 @@ function App() {
 							)}
 						/>
 					</div>
-					<div className="flex items-center gap-6">
-						<div className="flex items-center gap-2">
-							<FormField
-								control={form.control}
-								name="needScreenshot"
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<Switch
-												checked={field.value}
-												onCheckedChange={field.onChange}
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-							<p>スクショ</p>
-						</div>
+					<div className="flex items-center gap-2">
+						<FormField
+							control={form.control}
+							name="needScreenshot"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Switch
+											checked={field.value}
+											onCheckedChange={field.onChange}
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<p>スクショ</p>
 					</div>
+					<FormField
+						control={form.control}
+						name="type"
+						render={({ field }) => (
+							<FormItem>
+								<FormControl>
+									<RadioGroup
+										value={field.value}
+										onValueChange={field.onChange}
+										defaultValue="talk"
+										className="flex gap-4"
+									>
+										{["talk", "work_theme", "afk", "back"].map((type) => (
+											<div key={type}>
+												<RadioGroupItem value={type} id={type} />
+												<Label className="ms-1" htmlFor={type}>
+													{type}
+												</Label>
+											</div>
+										))}
+									</RadioGroup>
+								</FormControl>
+							</FormItem>
+						)}
+					/>
 					<Button type="submit" className="w-48" size={"lg"}>
 						送信
 					</Button>
