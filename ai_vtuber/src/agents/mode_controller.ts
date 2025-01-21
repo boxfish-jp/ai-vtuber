@@ -2,7 +2,6 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import type { Activity } from "../activity/activity.js";
-import type { instructionEvent } from "../event/event.js";
 import { getlocalModel } from "../lib/model.js";
 import { getAfk } from "./afk/afk.js";
 import type { Agent } from "./agent.js";
@@ -17,35 +16,20 @@ import { getWorkTheme } from "./work_theme/work_theme.js";
 export class ModeController {
 	private currentMode: mode = "talk";
 
-	async classify(activity: Activity): Promise<Agent | undefined> {
-		if (activity.instruction) {
-			return this.instructionClassify(activity.instruction);
-		}
-		const agent = await this.autoClassify(activity);
-		return agent;
-	}
-
 	resetMode(): void {
 		this.currentMode = "talk";
 	}
 
-	private instructionClassify = (
-		instruction: instructionEvent["type"],
-	): Agent => {
-		this.currentMode = instruction;
-		switch (this.currentMode) {
-			case "talk":
-				return getTalk();
-			case "work_theme":
-				return getWorkTheme();
-			case "grade":
-				return getGrade();
-			case "afk":
-				return getAfk();
-			case "back":
-				return getAfk();
+	async classify(activity: Activity): Promise<Agent | undefined> {
+		if (activity.instruction) {
+			return this.getAgent(activity.instruction);
 		}
-	};
+		if (this.currentMode !== "talk") {
+			return undefined;
+		}
+		const agent = await this.autoClassify(activity);
+		return agent;
+	}
 
 	private autoClassify = async (
 		activity: Activity,
@@ -64,7 +48,26 @@ export class ModeController {
 		if (result.tool_calls === undefined || result.tool_calls.length === 0) {
 			return undefined;
 		}
-		switch (result.tool_calls[0].name) {
+		return this.getAgent(result.tool_calls[0].name);
+	};
+
+	private getAgent = (mode: string): Agent | undefined => {
+		switch (mode) {
+			case "talk":
+				this.currentMode = "talk";
+				return getTalk();
+			case "work_theme":
+				this.currentMode = "work_theme";
+				return getWorkTheme();
+			case "grade":
+				this.currentMode = "grade";
+				return getGrade();
+			case "afk":
+				this.currentMode = "afk";
+				return getAfk();
+			case "back":
+				this.currentMode = "back";
+				return getAfk();
 			case "cliTool":
 				this.currentMode = "cli";
 				return getCli();
