@@ -16,12 +16,13 @@ export class Talk implements Agent {
 		console.log("chatHistoryPrompt", chatHistoryPrompt);
 		const inputPrompt = activity.inputPrompt;
 		console.log("input", inputPrompt);
-		const systemPrompt = getTalkSystemPrompt(chatHistoryPrompt);
+		const systemPrompt = getTalkSystemPrompt;
 		const examplePrompt = await convertToExamplePrompt(
 			getTalkExamplePromptData(),
 		);
 		const prompt = ChatPromptTemplate.fromMessages([
 			["system", "{system}"],
+			["placeholder", "{history}"],
 			examplePrompt,
 			inputPrompt,
 		]);
@@ -31,6 +32,7 @@ export class Talk implements Agent {
 		try {
 			const response = await chain.invoke({
 				system: systemPrompt,
+				history: chatHistoryPrompt,
 			});
 			return {
 				text: cleanLlmResponse(response),
