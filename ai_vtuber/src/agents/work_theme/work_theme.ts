@@ -21,10 +21,11 @@ export class WorkTheme implements Agent {
 	private async consult(activity: Activity) {
 		const chatHistoryPrompt = activity.chatHistoryPrompt;
 		const inputPrompt = activity.inputPrompt;
-		const systemPrompt = workThemeSystemPrompt(chatHistoryPrompt);
+		const systemPrompt = workThemeSystemPrompt;
 
 		const prompt = ChatPromptTemplate.fromMessages([
 			["system", "{system}"],
+			["placeholder", "{history}"],
 			inputPrompt,
 		]);
 
@@ -33,6 +34,7 @@ export class WorkTheme implements Agent {
 		try {
 			const response = await chain.invoke({
 				system: systemPrompt,
+				history: chatHistoryPrompt,
 			});
 			if (response.tool_calls?.length) {
 				const toolName = response.tool_calls[0].name as keyof typeof this.tools;
@@ -70,7 +72,7 @@ export class WorkTheme implements Agent {
 		{
 			name: "confirm",
 			description:
-				"inputに作業内容の要約を入力すると、その作業内容が確定されます。",
+				"inputに作業内容の要約を入力すると、作業内容の登録ができます。",
 			schema: z.object({
 				input: z.string(),
 			}),
