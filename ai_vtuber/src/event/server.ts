@@ -20,7 +20,7 @@ const instructionEventSchema = z.object({
 	needScreenshot: z.boolean(),
 });
 
-let eventListener = (event: LiveEvent) => {
+let eventListener = (event: LiveEvent, broadcast?: string) => {
 	console.log(event);
 };
 
@@ -31,7 +31,7 @@ const appChatPost = app.post(
 	(c) => {
 		const data = c.req.valid("json");
 		const newEvent = new LiveEvent(data, undefined, undefined);
-		eventListener(newEvent);
+		eventListener(newEvent, JSON.stringify(data));
 		return c.text("ok");
 	},
 );
@@ -61,13 +61,18 @@ const ioServer = new Server(server as HttpServer, {
 export const eventServer = (
 	onNewEvent: (event: LiveEvent) => Promise<void>,
 ) => {
-	eventListener = onNewEvent;
+	eventListener = (event: LiveEvent, broadcast?: string) => {
+		if (broadcast) {
+			ioServer.emit("chat", broadcast);
+		}
+		onNewEvent(event);
+	};
 	ioServer.on("connection", (socket) => {
 		socket.on("chat", (msg: string) => {
 			const receivedMessage = chatEventSchema.parse(JSON.parse(msg));
 			const newEvent = new LiveEvent(receivedMessage, undefined, undefined);
-			ioServer.emit("chat", JSON.stringify(receivedMessage));
-			eventListener(newEvent);
+
+			eventListener(newEvent, msg);
 		});
 
 		socket.on("speak", (msg: string): void => {
