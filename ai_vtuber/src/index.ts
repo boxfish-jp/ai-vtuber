@@ -21,14 +21,14 @@ eventServer(async (event) => {
 		console.log("no agent");
 		return;
 	}
-	const response = await agent.service(activity);
-	if (response.text.length < 10) {
+	const newActivity = await makeActivity(event);
+	const response = await agent.service(newActivity);
+	if (response.completed) {
+		console.log("reset mode");
+		modeController.resetMode();
+	} else if (response.text.length < 10) {
 		return;
 	}
-	if (response.completed) {
-		modeController.resetMode();
-	}
-
 	console.log("response", response);
 	const aiState = getAiState();
 	aiState.setTalking();

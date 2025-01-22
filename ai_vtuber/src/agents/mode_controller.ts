@@ -2,6 +2,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import type { Activity } from "../activity/activity.js";
+import { makeAsPointed } from "../activity/db/chat_db.js";
 import { getlocalModel } from "../lib/model.js";
 import { getAfk } from "./afk/afk.js";
 import type { Agent } from "./agent.js";
@@ -38,7 +39,7 @@ export class ModeController {
 			"あなたは有能なアシスタントです。ユーザーから「リマインダーを設定する」「エディターを開く」「特定のwebサイトを開く」作業を頼まれた場合は何があっても必ずツールを呼び出してください。あなたはその作業について詳細をユーザーに聞くようなことはしなくて構いません。以下がこれまでの会話履歴です。";
 		const prompt = ChatPromptTemplate.fromMessages([
 			["system", "{system}"],
-			activity.lastChat,
+			activity.lastChat.content,
 		]);
 		const model = await getlocalModel();
 		const modelWithTools = prompt.pipe(
@@ -49,6 +50,7 @@ export class ModeController {
 		if (result.tool_calls === undefined || result.tool_calls.length === 0) {
 			return undefined;
 		}
+		await makeAsPointed(activity.lastChat.unixTime);
 		return this.getAgent(result.tool_calls[0].name);
 	};
 
@@ -90,7 +92,7 @@ export class ModeController {
 		{
 			name: "cli",
 			description:
-				"ブラウザで特定のページを開きユーザーにそのページを閲覧させる、特定のディレクトリにてエディターを開く,Lazygitを開くといった処理を専門に担うLLMエージェントです。",
+				"ブラウザで特定のページを開きユーザーにそのページを閲覧させる、エディターを開く、ターミナルを開く,Lazygitを開くといった処理を専門に担うLLMエージェントです。",
 			schema: z.object({}),
 		},
 	);

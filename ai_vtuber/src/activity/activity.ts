@@ -141,7 +141,7 @@ export class Activity {
 		return inputPrompt;
 	}
 
-	get lastChat(): string {
-		return this._chatHistory[this._chatHistory.length - 1].content;
+	get lastChat(): chatEvent {
+		return this._chatHistory[this._chatHistory.length - 1];
 	}
 }
