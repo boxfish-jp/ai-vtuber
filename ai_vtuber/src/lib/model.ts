@@ -15,7 +15,7 @@ let _localModel: ChatOllama;
 const getGemini = (modelName: string) => {
 	const gemini = new ChatVertexAI({
 		model: modelName,
-		maxOutputTokens: 50,
+		maxOutputTokens: 100,
 		location: "asia-northeast1",
 		safetySettings: [
 			{
