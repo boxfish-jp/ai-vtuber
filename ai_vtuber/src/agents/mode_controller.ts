@@ -25,7 +25,7 @@ export class ModeController {
 			return this.getAgent(activity.instruction);
 		}
 		if (this.currentMode !== "talk") {
-			return undefined;
+			return this.getAgent(this.currentMode);
 		}
 		const agent = await this.autoClassify(activity);
 		return agent;
@@ -35,16 +35,17 @@ export class ModeController {
 		activity: Activity,
 	): Promise<Agent | undefined> => {
 		const systemPrompt =
-			"あなたは有能なアシスタントです。ユーザーから「リマインダーを設定する」「開発ツールを開く」「特定のwebサイトを開く」作業を頼まれた場合は何があっても必ずツールを呼び出してください。あなたはその作業について詳細をユーザーに聞くようなことはしなくて構いません。以下がこれまでの会話履歴です。";
+			"あなたは有能なアシスタントです。ユーザーから「リマインダーを設定する」「エディターを開く」「特定のwebサイトを開く」作業を頼まれた場合は何があっても必ずツールを呼び出してください。あなたはその作業について詳細をユーザーに聞くようなことはしなくて構いません。以下がこれまでの会話履歴です。";
 		const prompt = ChatPromptTemplate.fromMessages([
 			["system", "{system}"],
-			activity.inputPrompt,
+			activity.lastChat,
 		]);
 		const model = await getlocalModel();
 		const modelWithTools = prompt.pipe(
-			model.bindTools([this.cliTool, this.remineder, this.spotify]),
+			model.bindTools([this.cli, this.remineder, this.spotify]),
 		);
 		const result = await modelWithTools.invoke({ system: systemPrompt });
+		console.log(result);
 		if (result.tool_calls === undefined || result.tool_calls.length === 0) {
 			return undefined;
 		}
@@ -68,7 +69,7 @@ export class ModeController {
 			case "back":
 				this.currentMode = "back";
 				return getAfk();
-			case "cliTool":
+			case "cli":
 				this.currentMode = "cli";
 				return getCli();
 			case "remineder":
@@ -82,14 +83,14 @@ export class ModeController {
 		}
 	};
 
-	private cliTool = tool(
+	private cli = tool(
 		(): void => {
 			return;
 		},
 		{
-			name: "cliTool",
+			name: "cli",
 			description:
-				"ブラウザで特定のページを開きユーザーにそのページを閲覧させる、特定のディレクトリにてvscodeやNeovim,Lazygitを開くといった処理を専門に担うLLMエージェントです。",
+				"ブラウザで特定のページを開きユーザーにそのページを閲覧させる、特定のディレクトリにてエディターを開く,Lazygitを開くといった処理を専門に担うLLMエージェントです。",
 			schema: z.object({}),
 		},
 	);
