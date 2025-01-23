@@ -10,22 +10,18 @@ import { cliSystemPrompt } from "./prompt.js";
 
 export class Cli {
 	async service(activity: Activity): Promise<AgentResponse> {
-		const chatHistoryPrompt = activity.chatHistoryPrompt;
-		const inputPrompt = activity.inputPrompt;
-		const systemPrompt = cliSystemPrompt;
-
 		const prompt = ChatPromptTemplate.fromMessages([
 			["system", "{system}"],
 			["placeholder", "{history}"],
-			inputPrompt,
+			activity.inputNoViewerPrompt,
 		]);
 
 		const modelWithTools = gemini.bindTools([this.execute]);
 		const chain = prompt.pipe(modelWithTools);
 		try {
 			const response = await chain.invoke({
-				system: systemPrompt,
-				history: chatHistoryPrompt,
+				system: cliSystemPrompt,
+				history: activity.chatNoViewerHistoryPrompt,
 			});
 			if (response.tool_calls?.length) {
 				const toolName = response.tool_calls[0].name as keyof typeof this.tools;

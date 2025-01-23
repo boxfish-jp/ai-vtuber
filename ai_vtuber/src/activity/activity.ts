@@ -104,6 +104,54 @@ export class Activity {
 		return messages;
 	}
 
+	get chatNoViewerHistoryPrompt(): (AIMessage | HumanMessage)[] {
+		const messages: (AIMessage | HumanMessage)[] = [];
+		let tempMessage: { who: string; content: string } = {
+			who: "",
+			content: "",
+		};
+		for (const [i, chat] of this._chatHistory.entries()) {
+			if (tempMessage.who === chat.who && i !== this.chatHistory.length - 1) {
+				switch (chat.who) {
+					case "fuguo":
+						tempMessage.content += `ふぐお「${chat.content}」`;
+						break;
+					case "viewer":
+						break;
+					case "info":
+						tempMessage.content += `info「${chat.content}」`;
+						break;
+					case "ai":
+						tempMessage.content += `${chat.content}`;
+						break;
+				}
+			} else {
+				if (tempMessage.who !== "") {
+					if (tempMessage.who === "ai") {
+						messages.push(
+							new AIMessage({
+								content: [{ type: "text", text: tempMessage.content }],
+							}),
+						);
+					} else {
+						messages.push(
+							new HumanMessage({
+								content: [{ type: "text", text: tempMessage.content }],
+							}),
+						);
+					}
+				}
+				tempMessage = { who: chat.who, content: chat.content };
+			}
+		}
+		for (let i = messages.length - 1; i >= 0; i--) {
+			if (messages[i] instanceof HumanMessage) {
+				messages.splice(i, 1);
+			}
+		}
+		return messages;
+	}
+
 	get inputPrompt(): HumanMessage {
 		let inputText = "";
 		for (let i = this._chatHistory.length - 1; i >= 0; i--) {
@@ -117,6 +165,42 @@ export class Activity {
 					break;
 				case "viewer":
 					inputText = `視聴者「${chat.content}」${inputText}`;
+					break;
+				case "info":
+					inputText = `info「${chat.content}」${inputText}`;
+					break;
+			}
+		}
+		const inputPrompt = this._screenShotUrl
+			? new HumanMessage({
+					content: [
+						{ type: "text", text: inputText },
+						{
+							type: "image_url",
+							image_url: {
+								url: this._screenShotUrl,
+							},
+						},
+					],
+				})
+			: new HumanMessage({
+					content: [{ type: "text", text: inputText }],
+				});
+		return inputPrompt;
+	}
+
+	get inputNoViewerPrompt(): HumanMessage {
+		let inputText = "";
+		for (let i = this._chatHistory.length - 1; i >= 0; i--) {
+			const chat = this._chatHistory[i];
+			if (chat.who === "ai") {
+				break;
+			}
+			switch (chat.who) {
+				case "fuguo":
+					inputText = `ふぐお「${chat.content}」${inputText}`;
+					break;
+				case "viewer":
 					break;
 				case "info":
 					inputText = `info「${chat.content}」${inputText}`;
