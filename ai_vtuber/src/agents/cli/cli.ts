@@ -6,6 +6,7 @@ import type { Activity } from "../../activity/activity.js";
 import { gemini } from "../../lib/model.js";
 import type { AgentResponse } from "../agent.js";
 import { cleanLlmResponse } from "../llm_response_cleaner.js";
+import { Talk } from "../talk/talk.js";
 import { cliSystemPrompt } from "./prompt.js";
 
 export class Cli {
@@ -33,11 +34,13 @@ export class Cli {
 					completed: true,
 				};
 			}
+			const originalText =
+				typeof response.content === "string"
+					? cleanLlmResponse(response.content)
+					: "";
+			const finalResponse = await new Talk().translate(activity, originalText);
 			return {
-				text:
-					typeof response.content === "string"
-						? cleanLlmResponse(response.content)
-						: "",
+				text: finalResponse.text,
 				completed: false,
 			};
 		} catch (e) {

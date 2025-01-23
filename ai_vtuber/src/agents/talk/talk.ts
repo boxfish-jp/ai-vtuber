@@ -8,6 +8,7 @@ import { convertToExamplePrompt } from "./lib/convert/example.js";
 import {
 	getTalkExamplePromptData,
 	getTalkSystemPrompt,
+	translateSystemPrompt,
 } from "./prompt/talk.js";
 
 export class Talk implements Agent {
@@ -33,6 +34,40 @@ export class Talk implements Agent {
 			const response = await chain.invoke({
 				system: systemPrompt,
 				history: chatHistoryPrompt,
+			});
+			return {
+				text: cleanLlmResponse(response),
+				completed: true,
+			};
+		} catch (e) {
+			console.log("error:", e);
+			return {
+				text: "思考が停止しました。",
+				completed: true,
+			};
+		}
+	}
+
+	async translate(
+		activity: Activity,
+		original: string,
+	): Promise<AgentResponse> {
+		const examplePrompt = await convertToExamplePrompt(
+			getTalkExamplePromptData(),
+		);
+		const prompt = ChatPromptTemplate.fromMessages([
+			["system", "{system}"],
+			["placeholder", "{history}"],
+			examplePrompt,
+			original,
+		]);
+
+		const parser = new StringOutputParser();
+		const chain = prompt.pipe(gemini).pipe(parser);
+		try {
+			const response = await chain.invoke({
+				system: translateSystemPrompt,
+				history: [...activity.chatHistoryPrompt, activity.inputPrompt],
 			});
 			return {
 				text: cleanLlmResponse(response),
