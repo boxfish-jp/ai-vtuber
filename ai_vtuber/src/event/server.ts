@@ -15,7 +15,7 @@ const chatEventSchema = z.object({
 });
 
 const instructionEventSchema = z.object({
-	type: z.enum(["talk", "work_theme", "afk", "back", "grade"]),
+	type: z.enum(["talk", "work_theme", "afk", "back", "grade", "reminder"]),
 	unixTime: z.string(),
 	needScreenshot: z.boolean(),
 });

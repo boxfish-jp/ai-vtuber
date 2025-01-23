@@ -9,7 +9,7 @@ import type { Agent } from "./agent.js";
 import { getCli } from "./cli/cli.js";
 import { getGrade } from "./grade/grade.js";
 import type { mode } from "./mode.js";
-import { getRemineder } from "./remineder/remineder.js";
+import { getReminder } from "./reminder/reminder.js";
 import { getSpotify } from "./spotify/spotify.js";
 import { getTalk } from "./talk/talk.js";
 import { getWorkTheme } from "./work_theme/work_theme.js";
@@ -36,14 +36,14 @@ export class ModeController {
 		activity: Activity,
 	): Promise<Agent | undefined> => {
 		const systemPrompt =
-			"あなたは有能なアシスタントです。ユーザーから「リマインダーを設定する」「エディターを開く」「特定のwebサイトを開く」作業を頼まれた場合は何があっても必ずツールを呼び出してください。あなたはその作業について詳細をユーザーに聞くようなことはしなくて構いません。以下がこれまでの会話履歴です。";
+			"あなたは有能なアシスタントです。ユーザーから「エディターを開く」「特定のwebサイトを開く」作業を頼まれた場合は何があっても必ずツールを呼び出してください。あなたはその作業について詳細をユーザーに聞くようなことはしなくて構いません。以下がこれまでの会話履歴です。";
 		const prompt = ChatPromptTemplate.fromMessages([
 			["system", "{system}"],
 			activity.lastChat.content,
 		]);
 		const model = await getlocalModel();
 		const modelWithTools = prompt.pipe(
-			model.bindTools([this.cli, this.remineder, this.spotify]),
+			model.bindTools([this.cli, this.spotify]),
 		);
 		const result = await modelWithTools.invoke({ system: systemPrompt });
 		console.log(result);
@@ -74,9 +74,9 @@ export class ModeController {
 			case "cli":
 				this.currentMode = "cli";
 				return getCli();
-			case "remineder":
-				this.currentMode = "remineder";
-				return getRemineder();
+			case "reminder":
+				this.currentMode = "reminder";
+				return getReminder();
 			case "spotify":
 				this.currentMode = "spotify";
 				return getSpotify();
@@ -93,17 +93,6 @@ export class ModeController {
 			name: "cli",
 			description:
 				"ブラウザで特定のページを開きユーザーにそのページを閲覧させる、エディターを開く、ターミナルを開く,Lazygitを開くといった処理を専門に担うLLMエージェントです。",
-			schema: z.object({}),
-		},
-	);
-
-	private remineder = tool(
-		(): void => {
-			return;
-		},
-		{
-			name: "remineder",
-			description: "リマインダー作成専門のLLMエージェントです。",
 			schema: z.object({}),
 		},
 	);

@@ -22,7 +22,9 @@ import { sendEvent, type socketServerChatType, watchChat } from "./lib/socket";
 import { speechRecognition } from "./lib/speechrecognition";
 
 const formSchema = z.object({
-	type: z.enum(["talk", "work_theme", "afk", "back", "grade"]).default("talk"),
+	type: z
+		.enum(["talk", "work_theme", "afk", "back", "grade", "reminder"])
+		.default("talk"),
 	unixTime: z.string(),
 	needScreenshot: z.boolean().default(false),
 });
@@ -148,16 +150,21 @@ function App() {
 										defaultValue="talk"
 										className="flex gap-4"
 									>
-										{["talk", "work_theme", "afk", "back", "grade"].map(
-											(type) => (
-												<div key={type}>
-													<RadioGroupItem value={type} id={type} />
-													<Label className="ms-1" htmlFor={type}>
-														{type}
-													</Label>
-												</div>
-											),
-										)}
+										{[
+											"talk",
+											"work_theme",
+											"afk",
+											"back",
+											"grade",
+											"reminder",
+										].map((type) => (
+											<div key={type}>
+												<RadioGroupItem value={type} id={type} />
+												<Label className="ms-1" htmlFor={type}>
+													{type}
+												</Label>
+											</div>
+										))}
 									</RadioGroup>
 								</FormControl>
 							</FormItem>

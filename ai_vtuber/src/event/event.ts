@@ -6,7 +6,7 @@ export interface chatEvent {
 }
 
 export interface instructionEvent {
-	type: "talk" | "work_theme" | "afk" | "back" | "grade";
+	type: "talk" | "work_theme" | "afk" | "back" | "grade" | "reminder";
 	unixTime: number;
 	needScreenshot: boolean;
 }
