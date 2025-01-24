@@ -28,8 +28,11 @@ export class ModeController {
 		if (this.currentMode !== "talk") {
 			return this.getAgent(this.currentMode);
 		}
-		const agent = await this.autoClassify(activity);
-		return agent;
+		if (activity.lastChat.who === "fuguo") {
+			const agent = await this.autoClassify(activity);
+			return agent;
+		}
+		return undefined;
 	}
 
 	private autoClassify = async (
