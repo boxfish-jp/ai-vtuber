@@ -38,7 +38,7 @@ export class ModeController {
 		activity: Activity,
 	): Promise<Agent | undefined> => {
 		const systemPrompt =
-			"あなたは有能なアシスタントです。ユーザーから「エディターを開く」「特定のwebサイトを開く」作業を頼まれた場合は何があっても必ずツールを呼び出してください。あなたはその作業について詳細をユーザーに聞くようなことはしなくて構いません。以下がこれまでの会話履歴です。";
+			"あなたは有能なアシスタントです。ユーザーから「何かを開く作業を頼まれた」「特定のwebサイトを開く作業を頼まれた」場合は何があっても必ずツールを呼び出してください。あなたはその作業について詳細をユーザーに聞くようなことはしなくて構いません。以下がこれまでの会話履歴です。";
 		const prompt = ChatPromptTemplate.fromMessages([
 			["system", "{system}"],
 			activity.lastChat.content,
@@ -67,10 +67,10 @@ export class ModeController {
 				return getGrade();
 			case "afk":
 				this.currentMode = "afk";
-				return getAfk();
+				return getAfk(true);
 			case "back":
 				this.currentMode = "back";
-				return getAfk();
+				return getAfk(false);
 			case "cli":
 				this.currentMode = "cli";
 				return getCli();
