@@ -80,6 +80,9 @@ export class ModeController {
 			case "spotify":
 				this.currentMode = "spotify";
 				return getSpotify();
+			case "reset":
+				this.currentMode = "talk";
+				return undefined;
 			default:
 				return undefined;
 		}

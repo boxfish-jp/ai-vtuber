@@ -15,7 +15,15 @@ const chatEventSchema = z.object({
 });
 
 const instructionEventSchema = z.object({
-	type: z.enum(["talk", "work_theme", "afk", "back", "grade", "reminder"]),
+	type: z.enum([
+		"talk",
+		"work_theme",
+		"afk",
+		"back",
+		"grade",
+		"reminder",
+		"reset",
+	]),
 	unixTime: z.string(),
 	needScreenshot: z.boolean(),
 });
@@ -82,9 +90,13 @@ export const eventServer = (
 
 		socket.on("instruction", (msg: string): void => {
 			const receivedMessage = instructionEventSchema.parse(JSON.parse(msg));
+			const unixTime =
+				receivedMessage.unixTime === ""
+					? undefined
+					: Number(receivedMessage.unixTime);
 			const instructionEvent = {
 				type: receivedMessage.type,
-				unixTime: Number(receivedMessage.unixTime),
+				unixTime: unixTime,
 				needScreenshot: receivedMessage.needScreenshot,
 			};
 			const newEvent = new LiveEvent(undefined, instructionEvent, undefined);

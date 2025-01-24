@@ -23,9 +23,9 @@ import { speechRecognition } from "./lib/speechrecognition";
 
 const formSchema = z.object({
 	type: z
-		.enum(["talk", "work_theme", "afk", "back", "grade", "reminder"])
+		.enum(["talk", "work_theme", "afk", "back", "grade", "reminder", "reset"])
 		.default("talk"),
-	unixTime: z.string(),
+	unixTime: z.string().default(""),
 	needScreenshot: z.boolean().default(false),
 });
 
@@ -54,11 +54,12 @@ function App() {
 		toast({
 			title: "AIに送信しました",
 		});
+		const unixTime = data.type === "reset" ? "" : data.unixTime;
 		sendEvent(
 			"instruction",
 			JSON.stringify({
 				type: data.type,
-				unixTime: data.unixTime,
+				unixTime: unixTime,
 				needScreenshot: data.needScreenshot,
 			}),
 		);
@@ -157,6 +158,7 @@ function App() {
 											"back",
 											"grade",
 											"reminder",
+											"reset",
 										].map((type) => (
 											<div key={type}>
 												<RadioGroupItem value={type} id={type} />
