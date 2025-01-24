@@ -10,7 +10,6 @@ import { getCli } from "./cli/cli.js";
 import { getGrade } from "./grade/grade.js";
 import type { mode } from "./mode.js";
 import { getReminder } from "./reminder/reminder.js";
-import { getSpotify } from "./spotify/spotify.js";
 import { getTalk } from "./talk/talk.js";
 import { getWorkTheme } from "./work_theme/work_theme.js";
 
@@ -45,9 +44,7 @@ export class ModeController {
 			activity.lastChat.content,
 		]);
 		const model = await getlocalModel();
-		const modelWithTools = prompt.pipe(
-			model.bindTools([this.cli, this.spotify]),
-		);
+		const modelWithTools = prompt.pipe(model.bindTools([this.cli]));
 		const result = await modelWithTools.invoke({ system: systemPrompt });
 		console.log(result);
 		if (result.tool_calls === undefined || result.tool_calls.length === 0) {
@@ -80,9 +77,6 @@ export class ModeController {
 			case "reminder":
 				this.currentMode = "reminder";
 				return getReminder();
-			case "spotify":
-				this.currentMode = "spotify";
-				return getSpotify();
 			case "reset":
 				this.currentMode = "talk";
 				return undefined;
@@ -99,17 +93,6 @@ export class ModeController {
 			name: "cli",
 			description:
 				"ブラウザで特定のページを開きユーザーにそのページを閲覧させる、エディターを開く、ターミナルを開く,Lazygitを開くといった処理を専門に担うLLMエージェントです。",
-			schema: z.object({}),
-		},
-	);
-
-	private spotify = tool(
-		() => {
-			return;
-		},
-		{
-			name: "spotify",
-			description: "音楽再生専門のLLMエージェントです。",
 			schema: z.object({}),
 		},
 	);
