@@ -54,17 +54,17 @@ function App() {
 		toast({
 			title: "AIに送信しました",
 		});
-		const unixTime = data.type === "reset" ? "" : data.unixTime;
 		sendEvent(
 			"instruction",
 			JSON.stringify({
 				type: data.type,
-				unixTime: unixTime,
+				unixTime: data.unixTime,
 				needScreenshot: data.needScreenshot,
 			}),
 		);
 		form.setValue("needScreenshot", false);
 		form.setValue("type", "talk");
+		form.setValue("unixTime", "");
 	};
 
 	return (
