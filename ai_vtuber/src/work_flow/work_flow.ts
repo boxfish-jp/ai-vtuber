@@ -22,4 +22,6 @@ export const getWorkFlow = () => {
 		const chatSession = await getLatestChatSection();
 		const activity = new Activity(chatSession, "", undefined);
 	});
+
+	return workFlow;
 };

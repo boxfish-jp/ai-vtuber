@@ -37,4 +37,6 @@ export const getEventHandler = (workFlow: EventEmitter<WorkFlow>) => {
 			workFlow.emit("onFuguoChat");
 		}
 	});
+
+	return eventHandler;
 };
