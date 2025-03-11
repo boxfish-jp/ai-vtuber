@@ -1,18 +1,17 @@
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import type { chatEvent, instructionEvent } from "./event.js";
+import type { ChatEvent, InstructionEvent } from "./event.js";
 
 export class Activity {
-	private _chatHistory: chatEvent[] = [];
-	private _screenShotUrl = "";
-	private _instruction: instructionEvent["type"] | undefined = undefined;
+	private _chatEvents: ChatEvent[] = [];
+	private _screenshotUrl = "";
+	private _instruction: InstructionEvent["type"] | undefined = undefined;
 
 	constructor(
-		chatHistory: chatEvent[],
-		screenShotUrl: string,
-		instruction: instructionEvent["type"] | undefined,
+		chatEvents: ChatEvent[],
+		screenshotUrl = "",
+		instruction: InstructionEvent["type"] | undefined = undefined,
 	) {
-		this._chatHistory = chatHistory;
-		this._screenShotUrl = screenShotUrl;
+		this._chatEvents = chatEvents;
+		this._screenshotUrl = screenshotUrl;
 		this._instruction = instruction;
 	}
 
@@ -20,136 +19,75 @@ export class Activity {
 		return this._instruction;
 	}
 
-	get chatHistory(): chatEvent[] {
-		return this._chatHistory;
+	get chatEvents(): ChatEvent[] {
+		return this._chatEvents;
 	}
 
-	get chatHistoryString(): string {
-		if (this._chatHistory.length <= 1) {
-			return "直前の会話履歴はありません";
-		}
-		const onlyHistory = this._chatHistory.slice(0, -1);
-		const messages: string[] = [];
-		for (const chat of onlyHistory) {
-			switch (chat.who) {
-				case "fuguo":
-					messages.push(`ふぐお「${chat.content}」`);
-					break;
-				case "viewer":
-					messages.push(`視聴者「${chat.content}」`);
-					break;
-				case "info":
-					messages.push(`アナウンス「${chat.content}」`);
-					break;
-				case "ai":
-					messages.push(`αちゃん「${chat.content}」`);
-					break;
-			}
-		}
-		return messages.join("\n");
+	set chatEvents(chatEvents: ChatEvent[]) {
+		this._chatEvents = chatEvents;
 	}
 
-	get chatHistoryPrompt(): (AIMessage | HumanMessage)[] {
-		const messages: (AIMessage | HumanMessage)[] = [];
-		let tempMessage: { who: string; content: string } = {
-			who: "",
-			content: "",
-		};
-		for (const [i, chat] of this._chatHistory.entries()) {
-			if (tempMessage.who === chat.who && i !== this.chatHistory.length - 1) {
+	get screenshotUrl() {
+		return this._screenshotUrl;
+	}
+
+	get chatEventsPrompt() {
+		return new ChatEventsPrompt(this._chatEvents);
+	}
+
+	get inputPrompt() {
+		return new InputPrompt(this._chatEvents);
+	}
+}
+
+class ChatEventsPrompt {
+	private _chatEvent: ChatEvent[];
+
+	constructor(chatEvent: ChatEvent[]) {
+		this._chatEvent = chatEvent;
+	}
+
+	toString(isContainViewer = true) {
+		if (this._chatEvent.length) {
+			const onlyHistory = this._chatEvent.slice(0, -1);
+			const messages: string[] = [];
+			for (const chat of onlyHistory) {
 				switch (chat.who) {
 					case "fuguo":
-						tempMessage.content += `ふぐお「${chat.content}」`;
+						messages.push(`ふぐお「${chat.content}」`);
 						break;
 					case "viewer":
-						tempMessage.content += `視聴者「${chat.content}」`;
+						if (isContainViewer) {
+							messages.push(`視聴者「${chat.content}」`);
+						}
 						break;
 					case "info":
-						tempMessage.content += `info「${chat.content}」`;
+						messages.push(`アナウンス「${chat.content}」`);
 						break;
 					case "ai":
-						tempMessage.content += `${chat.content}`;
+						messages.push(`αちゃん「${chat.content}」`);
 						break;
 				}
-			} else {
-				if (tempMessage.who !== "") {
-					if (tempMessage.who === "ai") {
-						messages.push(
-							new AIMessage({
-								content: [{ type: "text", text: tempMessage.content }],
-							}),
-						);
-					} else {
-						messages.push(
-							new HumanMessage({
-								content: [{ type: "text", text: tempMessage.content }],
-							}),
-						);
-					}
-				}
-				tempMessage = { who: chat.who, content: chat.content };
+			}
+			if (messages.length) {
+				return messages.join("\n");
 			}
 		}
-		for (let i = messages.length - 1; i >= 0; i--) {
-			if (messages[i] instanceof HumanMessage) {
-				messages.splice(i, 1);
-			}
-		}
-		return messages;
+		return "直前の会話履歴はありません";
+	}
+}
+
+class InputPrompt {
+	private _chatEvent: ChatEvent[];
+
+	constructor(chatEvent: ChatEvent[]) {
+		this._chatEvent = chatEvent;
 	}
 
-	get chatNoViewerHistoryPrompt(): (AIMessage | HumanMessage)[] {
-		const messages: (AIMessage | HumanMessage)[] = [];
-		let tempMessage: { who: string; content: string } = {
-			who: "",
-			content: "",
-		};
-		for (const [i, chat] of this._chatHistory.entries()) {
-			if (tempMessage.who === chat.who && i !== this.chatHistory.length - 1) {
-				switch (chat.who) {
-					case "fuguo":
-						tempMessage.content += `ふぐお「${chat.content}」`;
-						break;
-					case "viewer":
-						break;
-					case "info":
-						tempMessage.content += `info「${chat.content}」`;
-						break;
-					case "ai":
-						tempMessage.content += `${chat.content}`;
-						break;
-				}
-			} else {
-				if (tempMessage.who !== "") {
-					if (tempMessage.who === "ai") {
-						messages.push(
-							new AIMessage({
-								content: [{ type: "text", text: tempMessage.content }],
-							}),
-						);
-					} else {
-						messages.push(
-							new HumanMessage({
-								content: [{ type: "text", text: tempMessage.content }],
-							}),
-						);
-					}
-				}
-				tempMessage = { who: chat.who, content: chat.content };
-			}
-		}
-		for (let i = messages.length - 1; i >= 0; i--) {
-			if (messages[i] instanceof HumanMessage) {
-				messages.splice(i, 1);
-			}
-		}
-		return messages;
-	}
-
-	get inputPrompt(): HumanMessage {
+	toString(isContainViewer = true) {
 		let inputText = "";
-		for (let i = this._chatHistory.length - 1; i >= 0; i--) {
-			const chat = this._chatHistory[i];
+		for (let i = this._chatEvent.length - 1; i >= 0; i--) {
+			const chat = this._chatEvent[i];
 			if (chat.who === "ai") {
 				break;
 			}
@@ -158,68 +96,19 @@ export class Activity {
 					inputText = `ふぐお「${chat.content}」${inputText}`;
 					break;
 				case "viewer":
-					inputText = `視聴者「${chat.content}」${inputText}`;
+					if (isContainViewer) {
+						inputText = `視聴者「${chat.content}」${inputText}`;
+					}
 					break;
 				case "info":
 					inputText = `info「${chat.content}」${inputText}`;
 					break;
 			}
 		}
-		const inputPrompt = this._screenShotUrl
-			? new HumanMessage({
-					content: [
-						{ type: "text", text: inputText },
-						{
-							type: "image_url",
-							image_url: {
-								url: this._screenShotUrl,
-							},
-						},
-					],
-				})
-			: new HumanMessage({
-					content: [{ type: "text", text: inputText }],
-				});
-		return inputPrompt;
+		return inputText;
 	}
 
-	get inputNoViewerPrompt(): HumanMessage {
-		let inputText = "";
-		for (let i = this._chatHistory.length - 1; i >= 0; i--) {
-			const chat = this._chatHistory[i];
-			if (chat.who === "ai") {
-				break;
-			}
-			switch (chat.who) {
-				case "fuguo":
-					inputText = `ふぐお「${chat.content}」${inputText}`;
-					break;
-				case "viewer":
-					break;
-				case "info":
-					inputText = `info「${chat.content}」${inputText}`;
-					break;
-			}
-		}
-		const inputPrompt = this._screenShotUrl
-			? new HumanMessage({
-					content: [
-						{ type: "text", text: inputText },
-						{
-							type: "image_url",
-							image_url: {
-								url: this._screenShotUrl,
-							},
-						},
-					],
-				})
-			: new HumanMessage({
-					content: [{ type: "text", text: inputText }],
-				});
-		return inputPrompt;
-	}
-
-	get lastChat(): chatEvent {
-		return this._chatHistory[this._chatHistory.length - 1];
+	get onlyLast(): ChatEvent {
+		return this._chatEvent[this._chatEvent.length - 1];
 	}
 }

@@ -20,7 +20,7 @@ export const getWorkFlow = () => {
 
 	workFlow.on("onFuguoChat", async () => {
 		const chatSession = await getLatestChatSection();
-		const activity = new Activity(chatSession, "", undefined);
+		const activity = new Activity(chatSession);
 	});
 
 	return workFlow;
