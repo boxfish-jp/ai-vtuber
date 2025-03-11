@@ -8,38 +8,6 @@ interface talkStateDataType {
 	waiting: boolean;
 }
 
-class CharacterState implements talkStateDataType {
-	private _fuguo: FuguoState = new FuguoState();
-	private _ai: AiState = new AiState();
-	private _viewer: ViewerState = new ViewerState();
-
-	get fuguo(): FuguoState {
-		return this._fuguo;
-	}
-
-	get ai(): AiState {
-		return this._ai;
-	}
-
-	get viewer(): ViewerState {
-		return this._viewer;
-	}
-
-	get silence(): boolean {
-		return this._fuguo.silence && this._viewer.silence && this._ai.silence;
-	}
-
-	get waiting(): boolean {
-		return this._ai.waiting && this._fuguo.waiting && this._viewer.waiting;
-	}
-
-	get talking(): boolean {
-		return this._ai.talking || this._fuguo.talking || this._viewer.waiting;
-	}
-}
-
-export const characterState = new CharacterState();
-
 class ViewerState implements talkStateDataType {
 	get talking(): boolean {
 		return viewerTalkingTime < 3000;
@@ -94,3 +62,41 @@ class AiState implements talkStateDataType {
 		return new Date().getTime() - aiTalkingTime > 5000 && !this.talking;
 	}
 }
+
+class CharacterState implements talkStateDataType {
+	private _fuguo: FuguoState;
+	private _ai: AiState;
+	private _viewer: ViewerState;
+
+	constructor() {
+		this._fuguo = new FuguoState();
+		this._ai = new AiState();
+		this._viewer = new ViewerState();
+	}
+
+	get fuguo(): FuguoState {
+		return this._fuguo;
+	}
+
+	get ai(): AiState {
+		return this._ai;
+	}
+
+	get viewer(): ViewerState {
+		return this._viewer;
+	}
+
+	get silence(): boolean {
+		return this._fuguo.silence && this._viewer.silence && this._ai.silence;
+	}
+
+	get waiting(): boolean {
+		return this._ai.waiting && this._fuguo.waiting && this._viewer.waiting;
+	}
+
+	get talking(): boolean {
+		return this._ai.talking || this._fuguo.talking || this._viewer.waiting;
+	}
+}
+
+export const characterState = new CharacterState();
