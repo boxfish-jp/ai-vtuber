@@ -1,5 +1,5 @@
 import EventEmitter from "node:events";
-import type { WorkFlow } from "../work_flow/work_flow.js";
+import type { WorkFlowHandler } from "../work_flow/work_flow_handler.js";
 import { characterState } from "./character_state.js";
 import { insertChatDb, makeAsPointed } from "./chat_db.js";
 import type { ChatEvent, InstructionEvent } from "./event.js";
@@ -10,7 +10,7 @@ export interface EventHandler {
 	onChat: [chat: ChatEvent];
 }
 
-export const getEventHandler = (workFlow: EventEmitter<WorkFlow>) => {
+export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
 	const eventHandler = new EventEmitter<EventHandler>();
 
 	eventHandler.on("onFuguoSound", (soundIsOn: boolean) => {
