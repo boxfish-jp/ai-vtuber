@@ -1,3 +1,4 @@
+import type EventEmitter from "node:events";
 import type { Server as HttpServer } from "node:http";
 import { serve } from "@hono/node-server";
 import { zValidator } from "@hono/zod-validator";
@@ -5,7 +6,8 @@ import { Hono } from "hono";
 import { Server } from "socket.io";
 import { z } from "zod";
 import endpointJson from "../../../endpoint.json";
-import { LiveEvent } from "./event.js";
+import { LiveEvent, type chatEvent, type instructionEvent } from "./event.js";
+import type { EventHandler } from "./event_handler.js";
 
 const chatEventSchema = z.object({
 	who: z.enum(["ai", "fuguo", "viewer", "info"]),
@@ -28,23 +30,7 @@ const instructionEventSchema = z.object({
 	needScreenshot: z.boolean(),
 });
 
-let eventListener = (event: LiveEvent, broadcast?: string) => {
-	console.log(event);
-};
-
 const app = new Hono();
-const appChatPost = app.post(
-	"/chat",
-	zValidator("json", chatEventSchema),
-	(c) => {
-		const data = c.req.valid("json");
-		const newEvent = new LiveEvent(data, undefined, undefined);
-		eventListener(newEvent, JSON.stringify(data));
-		return c.text("ok");
-	},
-);
-
-export type appChatPostType = typeof appChatPost;
 
 const server = serve(
 	{
@@ -66,26 +52,28 @@ const ioServer = new Server(server as HttpServer, {
 	},
 });
 
-export const eventServer = (
-	onNewEvent: (event: LiveEvent) => Promise<void>,
-) => {
-	eventListener = (event: LiveEvent, broadcast?: string) => {
-		if (broadcast) {
-			ioServer.emit("chat", broadcast);
-		}
-		onNewEvent(event);
-	};
+export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
+	const appChatPost = app.post(
+		"/chat",
+		zValidator("json", chatEventSchema),
+		(c) => {
+			const data: chatEvent = c.req.valid("json");
+			const newEvent = new LiveEvent(data, undefined, undefined);
+			ioServer.emit(JSON.stringify(data));
+			eventHandler.emit("onChat", data);
+			return c.text("ok");
+		},
+	);
+
 	ioServer.on("connection", (socket) => {
 		socket.on("chat", (msg: string) => {
-			const receivedMessage = chatEventSchema.parse(JSON.parse(msg));
-			const newEvent = new LiveEvent(receivedMessage, undefined, undefined);
-
-			eventListener(newEvent, msg);
+			const receivedMessage: chatEvent = chatEventSchema.parse(JSON.parse(msg));
+			ioServer.emit(msg);
+			eventHandler.emit("onChat", receivedMessage);
 		});
 
 		socket.on("speak", (msg: string): void => {
-			const newEvent = new LiveEvent(undefined, undefined, msg === "true");
-			eventListener(newEvent);
+			eventHandler.emit("onFuguoSound", msg === "true");
 		});
 
 		socket.on("instruction", (msg: string): void => {
@@ -94,13 +82,14 @@ export const eventServer = (
 				receivedMessage.unixTime === ""
 					? undefined
 					: Number(receivedMessage.unixTime);
-			const instructionEvent = {
+			const instructionEvent: instructionEvent = {
 				type: receivedMessage.type,
 				unixTime: unixTime,
 				needScreenshot: receivedMessage.needScreenshot,
 			};
-			const newEvent = new LiveEvent(undefined, instructionEvent, undefined);
-			eventListener(newEvent);
+			eventHandler.emit("onInstruction", instructionEvent);
 		});
 	});
+
+	return appChatPost;
 };
