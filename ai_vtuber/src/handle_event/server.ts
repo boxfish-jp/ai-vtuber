@@ -6,7 +6,7 @@ import { Hono } from "hono";
 import { Server } from "socket.io";
 import { z } from "zod";
 import endpointJson from "../../../endpoint.json";
-import { LiveEvent, type chatEvent, type instructionEvent } from "./event.js";
+import type { ChatEvent, InstructionEvent } from "./event.js";
 import type { EventHandler } from "./event_handler.js";
 
 const chatEventSchema = z.object({
@@ -57,8 +57,7 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 		"/chat",
 		zValidator("json", chatEventSchema),
 		(c) => {
-			const data: chatEvent = c.req.valid("json");
-			const newEvent = new LiveEvent(data, undefined, undefined);
+			const data: ChatEvent = c.req.valid("json");
 			ioServer.emit(JSON.stringify(data));
 			eventHandler.emit("onChat", data);
 			return c.text("ok");
@@ -67,7 +66,7 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 
 	ioServer.on("connection", (socket) => {
 		socket.on("chat", (msg: string) => {
-			const receivedMessage: chatEvent = chatEventSchema.parse(JSON.parse(msg));
+			const receivedMessage: ChatEvent = chatEventSchema.parse(JSON.parse(msg));
 			ioServer.emit(msg);
 			eventHandler.emit("onChat", receivedMessage);
 		});
@@ -82,7 +81,7 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 				receivedMessage.unixTime === ""
 					? undefined
 					: Number(receivedMessage.unixTime);
-			const instructionEvent: instructionEvent = {
+			const instructionEvent: InstructionEvent = {
 				type: receivedMessage.type,
 				unixTime: unixTime,
 				needScreenshot: receivedMessage.needScreenshot,

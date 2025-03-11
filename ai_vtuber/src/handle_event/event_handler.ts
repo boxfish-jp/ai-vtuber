@@ -2,12 +2,12 @@ import EventEmitter from "node:events";
 import type { WorkFlow } from "../work_flow/work_flow.js";
 import { characterState } from "./character_state.js";
 import { insertChatDb, makeAsPointed } from "./chat_db.js";
-import type { chatEvent, instructionEvent } from "./event.js";
+import type { ChatEvent, InstructionEvent } from "./event.js";
 
 export interface EventHandler {
 	onFuguoSound: [soundIsOn: boolean];
-	onInstruction: [instruction: instructionEvent];
-	onChat: [chat: chatEvent];
+	onInstruction: [instruction: InstructionEvent];
+	onChat: [chat: ChatEvent];
 }
 
 export const getEventHandler = (workFlow: EventEmitter<WorkFlow>) => {

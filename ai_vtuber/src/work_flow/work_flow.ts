@@ -1,11 +1,11 @@
 import EventEmitter from "node:events";
 import { Activity } from "../handle_event/activity.js";
 import { getLatestChatSection } from "../handle_event/chat_db.js";
-import type { instructionEvent } from "../handle_event/event.js";
+import type { InstructionEvent } from "../handle_event/event.js";
 import { takeScreenshot } from "./tool/take_screenshot.js";
 
 export interface WorkFlow {
-	onInstruction: [instruction: instructionEvent];
+	onInstruction: [instruction: InstructionEvent];
 	onFuguoChat: [];
 }
 
