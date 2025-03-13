@@ -41,15 +41,15 @@ export class Activity {
 }
 
 class ChatEventsPrompt {
-	private _chatEvent: ChatEvent[];
+	private _chatEvents: ChatEvent[];
 
-	constructor(chatEvent: ChatEvent[]) {
-		this._chatEvent = chatEvent;
+	constructor(chatEvents: ChatEvent[]) {
+		this._chatEvents = chatEvents;
 	}
 
 	toString(isContainViewer = true) {
-		if (this._chatEvent.length) {
-			const onlyHistory = this._chatEvent.slice(0, -1);
+		if (this._chatEvents.length) {
+			const onlyHistory = this._chatEvents.slice(0, -1);
 			const messages: string[] = [];
 			for (const chat of onlyHistory) {
 				switch (chat.who) {
