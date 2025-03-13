@@ -67,7 +67,8 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 	ioServer.on("connection", (socket) => {
 		socket.on("chat", (msg: string) => {
 			const receivedMessage: ChatEvent = chatEventSchema.parse(JSON.parse(msg));
-			ioServer.emit(msg);
+			ioServer.emit("chat", msg);
+			console.log(msg);
 			eventHandler.emit("onChat", receivedMessage);
 		});
 
