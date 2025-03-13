@@ -1,5 +1,5 @@
-import endpointJson from "../../../endpoint.json";
-import { sleep } from "../lib/sleep.js";
+import endpointJson from "../../../../../endpoint.json";
+import { sleep } from "../../../lib/sleep.js";
 import { play } from "./play.js";
 
 export interface VoicevoxAudioType {

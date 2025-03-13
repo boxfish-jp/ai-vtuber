@@ -1,5 +1,5 @@
 import { hc } from "hono/client";
-import endpointJson from "../../../endpoint.json";
+import endpointJson from "../../../../../endpoint.json";
 import type { appChatPostType } from "../event/server.js";
 
 export const play = async (

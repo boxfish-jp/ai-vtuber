@@ -1,5 +1,4 @@
-import { sleep } from "../lib/sleep.js";
-import { getAiState } from "../state/ai.js";
+import { sleep } from "../../../lib/sleep.js";
 import { play } from "./play.js";
 import { splitSentences } from "./splitSentences.js";
 import { VoicevoxAudio, type VoicevoxAudioType } from "./voicevox.js";
@@ -31,8 +30,6 @@ export class MakeAudio {
 					console.log("audio", audio.text);
 					await audio.play();
 				}
-				const aiState = getAiState();
-				aiState.setTalking();
 			}
 			await sleep(1000);
 		}
