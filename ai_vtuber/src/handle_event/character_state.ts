@@ -10,22 +10,18 @@ interface talkStateDataType {
 
 class ViewerState implements talkStateDataType {
 	get talking(): boolean {
-		return viewerTalkingTime < 3000;
+		return Date.now() - viewerTalkingTime < 1000;
 	}
 
 	setTalking() {
-		viewerTalkingTime = new Date().getTime();
+		viewerTalkingTime = Date.now();
 	}
 	get silence() {
-		return (
-			new Date().getTime() - viewerTalkingTime > 20000 && !viewerTalkingTime
-		);
+		return Date.now() - viewerTalkingTime > 20000 && !viewerTalkingTime;
 	}
 
 	get waiting() {
-		return (
-			new Date().getTime() - viewerTalkingTime > 10000 && !viewerTalkingTime
-		);
+		return Date.now() - viewerTalkingTime > 4000;
 	}
 }
 
@@ -35,14 +31,14 @@ class FuguoState implements talkStateDataType {
 	}
 
 	setTalking(bool: boolean) {
-		fuguoTalkingTime = bool ? 0 : new Date().getTime();
+		fuguoTalkingTime = bool ? 0 : Date.now();
 	}
 	get silence() {
-		return new Date().getTime() - fuguoTalkingTime > 15000 && !this.talking;
+		return Date.now() - fuguoTalkingTime > 15000 && !this.talking;
 	}
 
 	get waiting() {
-		return new Date().getTime() - fuguoTalkingTime > 7000 && !this.talking;
+		return Date.now() - fuguoTalkingTime > 4000 && !this.talking;
 	}
 }
 
@@ -52,14 +48,14 @@ class AiState implements talkStateDataType {
 	}
 
 	setTalking() {
-		aiTalkingTime = new Date().getTime();
+		aiTalkingTime = Date.now();
 	}
 	get silence() {
-		return new Date().getTime() - aiTalkingTime > 15000 && !this.talking;
+		return Date.now() - aiTalkingTime > 15000 && !this.talking;
 	}
 
 	get waiting() {
-		return new Date().getTime() - aiTalkingTime > 5000 && !this.talking;
+		return Date.now() - aiTalkingTime > 5000 && !this.talking;
 	}
 }
 
@@ -91,7 +87,7 @@ class CharacterState implements talkStateDataType {
 	}
 
 	get waiting(): boolean {
-		return this._ai.waiting && this._fuguo.waiting && this._viewer.waiting;
+		return this._viewer.waiting && this._ai.waiting && this.fuguo.waiting;
 	}
 
 	get talking(): boolean {
