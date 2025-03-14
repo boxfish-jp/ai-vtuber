@@ -27,6 +27,10 @@ export class Activity {
 		this._chatEvents = chatEvents;
 	}
 
+	get aiIsNeedWait(): boolean {
+		return this.chatEvents.length <= 3;
+	}
+
 	get screenshotUrl() {
 		return this._screenshotUrl;
 	}

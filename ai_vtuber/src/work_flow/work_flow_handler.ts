@@ -31,14 +31,65 @@ export const getWorkFlowHandler = () => {
 		]);
 		if (tool) {
 			makeAudio.addQueue(tool);
+			thought.afterSpeak = await llmHandler("afterCallTool", activity, thought);
 			return;
 		}
 		makeAudio.addQueue(response);
+		thought.afterSpeak = await llmHandler("afterSpeak", activity, thought);
+		return;
 	});
 
 	workFlowHandler.on("onFuguoChat", async () => {
 		const chatSession = await getLatestChatSection();
 		const activity = new Activity(chatSession);
+
+		if (activity.aiIsNeedWait) {
+			thought.beforeSpeak = await llmHandler("beforeSpeak", activity, thought);
+			const toolMessage = await llmHandler("talk", activity, thought);
+			if (toolMessage) {
+				makeAudio.addQueue(toolMessage);
+				thought.afterSpeak = await llmHandler(
+					"afterCallTool",
+					activity,
+					thought,
+				);
+			}
+			return;
+		}
+
+		const [concentrate, { response, toolMessage }] = await Promise.all([
+			llmHandler("isConcentrate", activity, thought),
+			(async () => {
+				thought.beforeSpeak = await llmHandler(
+					"beforeSpeak",
+					activity,
+					thought,
+				);
+				const [response, toolMessage] = await Promise.all([
+					llmHandler("talk", activity, thought),
+					llmHandler("callTool", activity, thought),
+				]);
+				return { response, toolMessage };
+			})(),
+		]);
+
+		if (toolMessage) {
+			makeAudio.addQueue(toolMessage);
+			thought.afterSpeak = await llmHandler("afterCallTool", activity, thought);
+			return;
+		}
+		if (concentrate.startsWith("集中")) {
+			thought.afterSpeak = await llmHandler("afterSpeak", activity, thought);
+			return;
+		}
+
+		makeAudio.addQueue(response);
+		thought.beforeSpeak = await llmHandler(
+			"afterSpeak",
+			activity,
+			thought,
+			response,
+		);
 	});
 
 	return workFlowHandler;
@@ -48,8 +99,9 @@ const llmHandler = async (
 	name: AgentName,
 	activity: Activity,
 	thought: Thought,
+	response = "",
 ): Promise<string> => {
-	const prompt = getPrompt(name, activity, thought);
+	const prompt = getPrompt(name, activity, thought, response);
 	if (name !== "callTool") {
 		const parser = new StringOutputParser();
 		return await gemini.pipe(parser).invoke(prompt);

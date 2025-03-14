@@ -1,12 +1,10 @@
 export class Thought {
 	private _beforeListen: string;
 	private _beforeSpeak: string;
-	private _afterSpeak: string;
 
 	constructor(beforeListen: string) {
 		this._beforeListen = beforeListen;
 		this._beforeSpeak = "";
-		this._afterSpeak = "";
 	}
 
 	get beforeListen() {
@@ -25,11 +23,7 @@ export class Thought {
 		this._beforeSpeak = thought;
 	}
 
-	get afterSpeak(): string {
-		return this._afterSpeak;
-	}
-
 	set afterSpeak(thought: string) {
-		this._afterSpeak = thought;
+		this._beforeListen = thought;
 	}
 }
