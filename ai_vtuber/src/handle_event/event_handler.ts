@@ -12,8 +12,12 @@ export interface EventHandler {
 
 export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
 	const eventHandler = new EventEmitter<EventHandler>();
+	let wasSilence = true;
 
 	eventHandler.on("onFuguoSound", (soundIsOn: boolean) => {
+		if (characterState.silence) {
+			wasSilence = true;
+		}
 		characterState.fuguo.setTalking(soundIsOn);
 	});
 
@@ -31,6 +35,12 @@ export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
 		if (chat.who === "ai") {
 			characterState.ai.setTalking();
 		}
+
+		if (wasSilence) {
+			chat.point = true;
+			wasSilence = false;
+		}
+
 		await insertChatDb(chat);
 
 		if (chat.who === "fuguo") {
