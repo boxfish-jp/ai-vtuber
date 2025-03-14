@@ -19,6 +19,7 @@ export const getWorkFlowHandler = () => {
 	const workFlowHandler = new EventEmitter<WorkFlowHandler>();
 	const thought = new Thought("配信が始まりました。");
 	const makeAudio = new MakeAudio();
+	const thinkQueue = new ThinkQueue();
 
 	workFlowHandler.on("onInstruction", async (instruction) => {
 		const imageUrl = instruction.needScreenshot ? await takeScreenshot() : "";
@@ -44,8 +45,27 @@ export const getWorkFlowHandler = () => {
 		const activity = new Activity(chatSession);
 
 		if (activity.aiIsNeedWait) {
-			thought.beforeSpeak = await llmHandler("beforeSpeak", activity, thought);
-			const toolMessage = await llmHandler("talk", activity, thought);
+			return;
+		}
+
+		thinkQueue.add(async () => {
+			console.log("startProcess");
+			const [concentrate, { response, toolMessage }] = await Promise.all([
+				llmHandler("isConcentrate", activity, thought),
+				(async () => {
+					thought.beforeSpeak = await llmHandler(
+						"beforeSpeak",
+						activity,
+						thought,
+					);
+					const [response, toolMessage] = await Promise.all([
+						llmHandler("talk", activity, thought),
+						llmHandler("callTool", activity, thought),
+					]);
+					return { response, toolMessage };
+				})(),
+			]);
+
 			if (toolMessage) {
 				makeAudio.addQueue(toolMessage);
 				thought.afterSpeak = await llmHandler(
@@ -53,47 +73,39 @@ export const getWorkFlowHandler = () => {
 					activity,
 					thought,
 				);
+				return;
 			}
-			return;
-		}
+			if (concentrate.startsWith("集中")) {
+				thought.afterSpeak = await llmHandler("afterSpeak", activity, thought);
+				return;
+			}
 
-		const [concentrate, { response, toolMessage }] = await Promise.all([
-			llmHandler("isConcentrate", activity, thought),
-			(async () => {
-				thought.beforeSpeak = await llmHandler(
-					"beforeSpeak",
-					activity,
-					thought,
-				);
-				const [response, toolMessage] = await Promise.all([
-					llmHandler("talk", activity, thought),
-					llmHandler("callTool", activity, thought),
-				]);
-				return { response, toolMessage };
-			})(),
-		]);
-
-		if (toolMessage) {
-			makeAudio.addQueue(toolMessage);
-			thought.afterSpeak = await llmHandler("afterCallTool", activity, thought);
-			return;
-		}
-		if (concentrate.startsWith("集中")) {
-			thought.afterSpeak = await llmHandler("afterSpeak", activity, thought);
-			return;
-		}
-
-		makeAudio.addQueue(response);
-		thought.beforeSpeak = await llmHandler(
-			"afterSpeak",
-			activity,
-			thought,
-			response,
-		);
+			makeAudio.addQueue(response);
+			thought.beforeSpeak = await llmHandler(
+				"afterSpeak",
+				activity,
+				thought,
+				response,
+			);
+		});
 	});
 
 	return workFlowHandler;
 };
+
+class ThinkQueue {
+	private _queue: NodeJS.Timeout[] = [];
+
+	add(callback: () => Promise<void>) {
+		while (this._queue.length) {
+			const unnecessaryQueue = this._queue.shift();
+			if (unnecessaryQueue !== undefined) {
+				clearTimeout(unnecessaryQueue);
+			}
+		}
+		this._queue.push(setTimeout(callback, 3000));
+	}
+}
 
 const llmHandler = async (
 	name: AgentName,
