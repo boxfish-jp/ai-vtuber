@@ -1,6 +1,7 @@
 import EventEmitter from "node:events";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { Activity } from "../handle_event/activity.js";
+import { characterState } from "../handle_event/character_state.js";
 import { getLatestChatSection } from "../handle_event/chat_db.js";
 import type { InstructionEvent } from "../handle_event/event.js";
 import { gemini } from "./model.js";
@@ -50,7 +51,7 @@ export const getWorkFlowHandler = () => {
 
 		thinkQueue.add(async () => {
 			console.log("startProcess");
-			const [concentrate, { response, toolMessage }] = await Promise.all([
+			const [concentrate, response] = await Promise.all([
 				llmHandler("isConcentrate", activity, thought),
 				(async () => {
 					thought.beforeSpeak = await llmHandler(
@@ -58,23 +59,11 @@ export const getWorkFlowHandler = () => {
 						activity,
 						thought,
 					);
-					const [response, toolMessage] = await Promise.all([
-						llmHandler("talk", activity, thought),
-						llmHandler("callTool", activity, thought),
-					]);
-					return { response, toolMessage };
+					const response = llmHandler("callTool", activity, thought);
+					return response;
 				})(),
 			]);
 
-			if (toolMessage) {
-				makeAudio.addQueue(toolMessage);
-				thought.afterSpeak = await llmHandler(
-					"afterCallTool",
-					activity,
-					thought,
-				);
-				return;
-			}
 			if (concentrate.startsWith("集中")) {
 				thought.afterSpeak = await llmHandler("afterSpeak", activity, thought);
 				return;
@@ -103,7 +92,13 @@ class ThinkQueue {
 				clearTimeout(unnecessaryQueue);
 			}
 		}
-		this._queue.push(setTimeout(callback, 3000));
+		this._queue.push(
+			setTimeout(async () => {
+				if (characterState.waiting) {
+					await callback();
+				}
+			}, 3000),
+		);
 	}
 }
 
