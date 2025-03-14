@@ -59,7 +59,7 @@ export const getWorkFlowHandler = () => {
 						activity,
 						thought,
 					);
-					const response = llmHandler("callTool", activity, thought);
+					const response = llmHandler("talk", activity, thought);
 					return response;
 				})(),
 			]);
@@ -97,7 +97,7 @@ class ThinkQueue {
 				if (characterState.waiting) {
 					await callback();
 				}
-			}, 3000),
+			}, 5000),
 		);
 	}
 }
