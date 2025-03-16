@@ -4,12 +4,11 @@ import { Activity } from "../handle_event/activity.js";
 import { characterState } from "../handle_event/character_state.js";
 import { getLatestChatSection } from "../handle_event/chat_db.js";
 import type { InstructionEvent } from "../handle_event/event.js";
+import { Agent, type AgentType } from "./agent.js";
 import { gemini } from "./model.js";
-import { type AgentName, getPrompt } from "./prompt.js";
 import { Thought } from "./thought.js";
 import { MakeAudio } from "./tool/make_audio/make_audio.js";
 import { takeScreenshot } from "./tool/take_screenshot.js";
-import { tools } from "./tool/tools.js";
 
 export interface WorkFlowHandler {
 	onInstruction: [instruction: InstructionEvent];
@@ -26,22 +25,19 @@ export const getWorkFlowHandler = () => {
 		const imageUrl = instruction.needScreenshot ? await takeScreenshot() : "";
 		const chatSession = await getLatestChatSection();
 		const activity = new Activity(chatSession, imageUrl, instruction.type);
-		thought.beforeSpeak = await llmHandler("beforeSpeak", activity, thought);
-		const [response, tool] = await Promise.all([
-			llmHandler("talk", activity, thought),
-			llmHandler("callTool", activity, thought),
-		]);
-		if (tool) {
-			makeAudio.addQueue(tool);
-			thought.afterSpeak = await llmHandler("afterCallTool", activity, thought);
+		thought.beforeSpeak = await think("beforeSpeak", activity, thought);
+		const action = await makeAction(instruction.type, activity, thought);
+		makeAudio.addQueue(action.message);
+		if (action.action) {
+			thought.afterSpeak = await think("afterSpeak", activity, thought);
 			return;
 		}
-		makeAudio.addQueue(response);
-		thought.afterSpeak = await llmHandler("afterSpeak", activity, thought);
+		thought.afterSpeak = await think("afterCallTool", activity, thought);
 		return;
 	});
 
 	workFlowHandler.on("onFuguoChat", async () => {
+		/*
 		const chatSession = await getLatestChatSection();
 		const activity = new Activity(chatSession);
 
@@ -77,6 +73,7 @@ export const getWorkFlowHandler = () => {
 				response,
 			);
 		});
+    */
 	});
 
 	return workFlowHandler;
@@ -102,25 +99,45 @@ class ThinkQueue {
 	}
 }
 
-const llmHandler = async (
-	name: AgentName,
+const think = async (
+	name: AgentType,
 	activity: Activity,
 	thought: Thought,
 	response = "",
 ): Promise<string> => {
-	const prompt = getPrompt(name, activity, thought, response);
-	if (name !== "callTool") {
+	const agent = new Agent(name);
+	const prompt = agent.getPrompt(activity, thought, response);
+	const parser = new StringOutputParser();
+	return await gemini.pipe(parser).invoke(prompt);
+};
+
+const makeAction = async (
+	name: AgentType,
+	activity: Activity,
+	thought: Thought,
+	response = "",
+): Promise<{ message: string; action: string }> => {
+	const agent = new Agent(name);
+	const prompt = agent.getPrompt(activity, thought, response);
+	if (!agent.tools) {
 		const parser = new StringOutputParser();
-		return await gemini.pipe(parser).invoke(prompt);
+		const response = await gemini.pipe(parser).invoke(prompt);
+		return { message: response, action: "" };
 	}
 	const result = await gemini
-		.bindTools(Object.values(tools).map((item) => item.tool))
+		.bindTools(Object.values(agent.tools).map((item) => item.tool))
 		.invoke(prompt);
 	if (result.tool_calls?.length) {
-		const toolName = result.tool_calls[0].name as keyof typeof tools;
-		const thistool = tools[toolName];
-		thistool.tool.invoke(result.tool_calls[0]);
-		return thistool.message;
+		const toolName = result.tool_calls[0].name as keyof typeof agent.tools;
+		const thistool = agent.tools[toolName];
+		if (thistool) {
+			thistool.tool.invoke(result.tool_calls[0]);
+			return { message: thistool.message, action: thistool.action };
+		}
 	}
-	return "";
+	const translatePrompt = new Agent("translate").getPrompt(activity, thought);
+	const translate = await gemini
+		.pipe(new StringOutputParser())
+		.invoke(translatePrompt);
+	return { message: translate, action: "" };
 };

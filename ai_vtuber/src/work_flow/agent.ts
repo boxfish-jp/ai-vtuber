@@ -1,25 +1,46 @@
 import type { Activity } from "../handle_event/activity.js";
 import type { Thought } from "./thought.js";
+import { cliTool } from "./tool/cli.js";
+import { workThemeTool } from "./tool/work_theme.js";
 
-export type AgentName =
+export type AgentType =
 	| "talk"
-	| "callTool"
+	| "cli"
 	| "isConcentrate"
+	| "translate"
 	| "beforeSpeak"
 	| "afterSpeak"
 	| "afterSilence"
-	| "afterCallTool";
+	| "afterCallTool"
+	| "work_theme";
 
-export const getPrompt = (
-	name: AgentName,
-	activity: Activity,
-	thought: Thought,
-	addition = "",
-) => {
-	let middlePrompt = "";
-	switch (name) {
-		case "beforeSpeak":
-			middlePrompt = `
+export class Agent {
+	private _agentName: AgentType;
+
+	constructor(agentname: AgentType) {
+		this._agentName = agentname;
+	}
+
+	get agentName() {
+		return this._agentName;
+	}
+
+	get tools() {
+		switch (this.agentName) {
+			case "cli":
+				return { cliTool };
+			case "work_theme":
+				return { workThemeTool };
+			default:
+				return undefined;
+		}
+	}
+
+	public getPrompt(activity: Activity, thought: Thought, addition = "") {
+		let middlePrompt = "";
+		switch (this.agentName) {
+			case "beforeSpeak":
+				middlePrompt = `
 Aが新たに発言しました。
 最初の一文目にBが直前で考えていたことは、Aの新しい発言によってどのように変化したか。
 次の2文目で, Bの次の発言や行動をする時に注意すべき点を1文程度で端的に出力ください。それ以外の文は出力しないでください。
@@ -29,10 +50,10 @@ ${thought.beforeListen}
 
 ${addition}
 `;
-			break;
+				break;
 
-		case "talk":
-			middlePrompt = `
+			case "talk":
+				middlePrompt = `
 Aが新たに発言しました。現在Bが考えていたことを踏まえて、Bが発言した言葉を考えてください。
 また、ツール呼び出しを行う必要がある場合は、ツール呼び出しを行ってください。
 それ以外の文は出力しないでください。
@@ -45,10 +66,10 @@ ${thought.beforeSpeak}
 
 ${addition}
 `;
-			break;
+				break;
 
-		case "isConcentrate":
-			middlePrompt = `
+			case "isConcentrate":
+				middlePrompt = `
 AはBの友達です。
 AとBは一緒に通話をしており、その様子を配信しています。また、Aは何かしらの作業をしています。Bはその様子を見守っています。
 以下の発言履歴からAは集中していると思われるでしょうか。それとも、別のことを考えているでしょうか。
@@ -59,10 +80,11 @@ AとBは一緒に通話をしており、その様子を配信しています。
 - 判断がつかない場合は、「判断がつかない」と出力してください。
 - それ以外は出力しないでください。
 `;
-			break;
+				break;
 
-		case "callTool":
-			middlePrompt = `
+			case "cli":
+			case "work_theme":
+				middlePrompt = `
 Aが新たに発言しました。現在Bが考えていたことを踏まえて、Bが発言した言葉を考えてください。
 また、ツール呼び出しを行う必要がある場合は、ツール呼び出しを行ってください。
 それ以外の文は出力しないでください。
@@ -75,10 +97,10 @@ ${thought.beforeSpeak}
 
 ${addition}
 `;
-			break;
+				break;
 
-		case "afterCallTool":
-			middlePrompt = `
+			case "translate":
+				middlePrompt = `
 このとき、Bが発言を受ける前までに考えていたことやBが発言をする際に考えていたことと一貫性があるようにしてください。
 
 # Bが発言を受ける前までに考えていたこと
@@ -91,10 +113,26 @@ ${thought.beforeSpeak}
 Aに頼まれていた操作を完了した。
 ${addition}
 `;
-			break;
+				break;
 
-		case "afterSpeak":
-			middlePrompt = `
+			case "afterCallTool":
+				middlePrompt = `
+このとき、Bが発言を受ける前までに考えていたことやBが発言をする際に考えていたことと一貫性があるようにしてください。
+
+# Bが発言を受ける前までに考えていたこと
+${thought.beforeListen}
+
+# Bが発言をする際に考えていたこと
+${thought.beforeSpeak}
+
+# Bの行動
+Aに頼まれていた操作を完了した。
+${addition}
+`;
+				break;
+
+			case "afterSpeak":
+				middlePrompt = `
 このとき、Bが発言を受ける前までに考えていたことやBが発言をする際に考えていたことと一貫性があるようにしてください。
 
 # Bが発言を受ける前までに考えていたこと
@@ -106,10 +144,10 @@ ${thought.beforeSpeak}
 # Bの行動
 ${addition}と発言した
 `;
-			break;
+				break;
 
-		case "afterSilence":
-			middlePrompt = `
+			case "afterSilence":
+				middlePrompt = `
 このとき、Bが発言を受ける前までに考えていたことやBが発言をする際に考えていたことと一貫性があるようにしてください。
 
 # Bが発言を受ける前までに考えていたこと
@@ -121,10 +159,11 @@ Aは集中しているようだ。今は話しかけないでおこう。
 # Bの行動
 今は何も話さないでおこう。
 `;
-			break;
+				break;
+		}
+		return templatePrompt(middlePrompt, activity.chatEvents.toString());
 	}
-	return templatePrompt(middlePrompt, activity.chatEvents.toString());
-};
+}
 
 const templatePrompt = (middlePrompt: string, chatPrompt: string) => `
 AはBの友達です。

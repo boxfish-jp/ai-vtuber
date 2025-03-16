@@ -2,7 +2,7 @@ import { exec } from "node:child_process";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
-export const cli = tool(
+const cli = tool(
 	({ command }: { command: string }): boolean => {
 		console.log("command:", command);
 		try {
@@ -64,3 +64,9 @@ start https://www.google.com/search?q=ラーメン
 		}),
 	},
 );
+
+export const cliTool = {
+	tool: cli,
+	message: "開けた？",
+	action: "CLIを操作し、ユーザーに頼まれていた操作を実行した。",
+};
