@@ -52,32 +52,26 @@ class ChatEventsPrompt {
 	}
 
 	toString(isContainViewer = true) {
-		if (this._chatEvents.length) {
-			const onlyHistory = this._chatEvents.slice(0, -1);
-			const messages: string[] = [];
-			for (const chat of onlyHistory) {
-				switch (chat.who) {
-					case "fuguo":
-						messages.push(`ふぐお「${chat.content}」`);
-						break;
-					case "viewer":
-						if (isContainViewer) {
-							messages.push(`視聴者「${chat.content}」`);
-						}
-						break;
-					case "info":
-						messages.push(`アナウンス「${chat.content}」`);
-						break;
-					case "ai":
-						messages.push(`αちゃん「${chat.content}」`);
-						break;
-				}
-			}
-			if (messages.length) {
-				return messages.join("\n");
+		const messages: string[] = [];
+		for (const chat of this._chatEvents) {
+			switch (chat.who) {
+				case "fuguo":
+					messages.push(`ふぐお「${chat.content}」`);
+					break;
+				case "viewer":
+					if (isContainViewer) {
+						messages.push(`視聴者「${chat.content}」`);
+					}
+					break;
+				case "info":
+					messages.push(`アナウンス「${chat.content}」`);
+					break;
+				case "ai":
+					messages.push(`ずんだもん「${chat.content}」`);
+					break;
 			}
 		}
-		return "直前の会話履歴はありません";
+		return messages.length ? messages.join("\n") : "";
 	}
 }
 
@@ -89,6 +83,8 @@ class InputPrompt {
 	}
 
 	toString(isContainViewer = true) {
+		throw new Error("たぶんバグあるよ。InputPrompt.this.toString");
+		/*
 		let inputText = "";
 		for (let i = this._chatEvent.length - 1; i >= 0; i--) {
 			const chat = this._chatEvent[i];
@@ -110,6 +106,7 @@ class InputPrompt {
 			}
 		}
 		return inputText;
+      */
 	}
 
 	get onlyLast(): ChatEvent {

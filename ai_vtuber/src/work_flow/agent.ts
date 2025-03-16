@@ -4,46 +4,58 @@ import { cliTool } from "./tool/cli.js";
 import { workThemeTool } from "./tool/work_theme.js";
 
 export type AgentType =
+	| "before_speak"
 	| "talk"
-	| "cli"
-	| "isConcentrate"
 	| "translate"
-	| "beforeSpeak"
-	| "afterSpeak"
-	| "afterSilence"
-	| "afterCallTool"
-	| "work_theme";
+	| "cli"
+	| "work_theme"
+	| "grade"
+	| "reminder"
+	| "afk"
+	| "back"
+	| "after_speak"
+	| "after_call_tool";
 
 export class Agent {
-	private _agentName: AgentType;
+	private _name: AgentType;
 
-	constructor(agentname: AgentType) {
-		this._agentName = agentname;
+	constructor(name: AgentType) {
+		this._name = name;
 	}
 
-	get agentName() {
-		return this._agentName;
+	get name() {
+		return this._name;
 	}
 
 	get tools() {
-		switch (this.agentName) {
+		switch (this.name) {
 			case "cli":
 				return { cliTool };
 			case "work_theme":
 				return { workThemeTool };
-			default:
+			case "after_call_tool":
+			case "translate":
+			case "after_speak":
+			case "back":
+			case "afk":
+			case "reminder":
+			case "grade":
+			case "talk":
+			case "before_speak":
 				return undefined;
+			default:
+				throw new Error("invalid tool");
 		}
 	}
 
 	public getPrompt(activity: Activity, thought: Thought, addition = "") {
 		let middlePrompt = "";
-		switch (this.agentName) {
-			case "beforeSpeak":
+		switch (this.name) {
+			case "before_speak":
 				middlePrompt = `
-Aが新たに発言しました。
-最初の一文目にBが直前で考えていたことは、Aの新しい発言によってどのように変化したか。
-次の2文目で, Bの次の発言や行動をする時に注意すべき点を1文程度で端的に出力ください。それ以外の文は出力しないでください。
+ふぐお、もしくは視聴者が新たに発言しました。
+最初の一文目にずんだもんが直前で考えていたことは、ふぐお、または視聴者の新しい発言によってどのように変化したか。
+次の2文目で, ずんだもんの次の発言や行動をする時に注意すべき点を1文程度で端的に出力ください。それ以外の文は出力しないでください。
 
 # Bが直前まで考えていたこと
 ${thought.beforeListen}
@@ -54,40 +66,9 @@ ${addition}
 
 			case "talk":
 				middlePrompt = `
-Aが新たに発言しました。現在Bが考えていたことを踏まえて、Bが発言した言葉を考えてください。
-また、ツール呼び出しを行う必要がある場合は、ツール呼び出しを行ってください。
-それ以外の文は出力しないでください。
+ふぐお、もしくは視聴者が新たに発言しました。現在ずんだもんが考えていたことを踏まえて、ずんだもんになりきって、ずんだもんのキャラクターで発言してください。それ以外の文は出力しないでください。
 
-# Bが以前に考えていたこと
-${thought.beforeListen}
-
-# Bが現在考えていたこと
-${thought.beforeSpeak}
-
-${addition}
-`;
-				break;
-
-			case "isConcentrate":
-				middlePrompt = `
-AはBの友達です。
-AとBは一緒に通話をしており、その様子を配信しています。また、Aは何かしらの作業をしています。Bはその様子を見守っています。
-以下の発言履歴からAは集中していると思われるでしょうか。それとも、別のことを考えているでしょうか。
-
-# 出力すること
-- 集中していると思われる場合は、「集中」と出力してください。
-- 別のことを考えている場合は、「別のことを考えている」と出力してください。
-- 判断がつかない場合は、「判断がつかない」と出力してください。
-- それ以外は出力しないでください。
-`;
-				break;
-
-			case "cli":
-			case "work_theme":
-				middlePrompt = `
-Aが新たに発言しました。現在Bが考えていたことを踏まえて、Bが発言した言葉を考えてください。
-また、ツール呼び出しを行う必要がある場合は、ツール呼び出しを行ってください。
-それ以外の文は出力しないでください。
+${characterPrompt}
 
 # Bが以前に考えていたこと
 ${thought.beforeListen}
@@ -100,6 +81,57 @@ ${addition}
 				break;
 
 			case "translate":
+				return `
+以下の発言内容をずんだもんになりきって、ずんだもんのキャラクターで言い換えてください。
+
+${characterPrompt}
+
+# 発言内容
+${addition}
+`;
+
+			case "cli":
+				middlePrompt = `
+ふぐおが新たに発言しました。現在、ふぐおからずんだもんに何かしらのPC操作が依頼されています。
+`;
+				break;
+
+			case "work_theme":
+				middlePrompt = `
+ふぐおが新たに発言しました。ずんだもんはふぐおに作業内容の変更を求められています。現在ずんだもんが考えていたことを踏まえて、ずんだもんが発言した言葉を考えてください。
+それ以外の文は出力しないでください。
+
+${addition}
+`;
+				break;
+
+			case "grade":
+				return `
+あなたは超辛口のギャグの審査員です。
+以下の文はユーザーが発したギャグです。
+一文目にあなたはそのギャグに対して100点満点で何点をつけるかを出力してください。
+二文目にはそのギャグに対しての短いコメントを出力してください。
+
+${activity.inputPrompt.onlyLast.content}
+`;
+
+			case "reminder":
+				return ` 
+`;
+
+			case "afk":
+				middlePrompt = `
+ふぐおが離席するようです。見送る言葉を発言してください。
+`;
+				break;
+
+			case "back":
+				middlePrompt = `
+ふぐおが離席から帰ってきました。出迎える言葉を発言してください。
+`;
+				break;
+
+			case "after_call_tool":
 				middlePrompt = `
 このとき、Bが発言を受ける前までに考えていたことやBが発言をする際に考えていたことと一貫性があるようにしてください。
 
@@ -110,28 +142,11 @@ ${thought.beforeListen}
 ${thought.beforeSpeak}
 
 # Bの行動
-Aに頼まれていた操作を完了した。
 ${addition}
 `;
 				break;
 
-			case "afterCallTool":
-				middlePrompt = `
-このとき、Bが発言を受ける前までに考えていたことやBが発言をする際に考えていたことと一貫性があるようにしてください。
-
-# Bが発言を受ける前までに考えていたこと
-${thought.beforeListen}
-
-# Bが発言をする際に考えていたこと
-${thought.beforeSpeak}
-
-# Bの行動
-Aに頼まれていた操作を完了した。
-${addition}
-`;
-				break;
-
-			case "afterSpeak":
+			case "after_speak":
 				middlePrompt = `
 このとき、Bが発言を受ける前までに考えていたことやBが発言をする際に考えていたことと一貫性があるようにしてください。
 
@@ -145,37 +160,42 @@ ${thought.beforeSpeak}
 ${addition}と発言した
 `;
 				break;
-
-			case "afterSilence":
-				middlePrompt = `
-このとき、Bが発言を受ける前までに考えていたことやBが発言をする際に考えていたことと一貫性があるようにしてください。
-
-# Bが発言を受ける前までに考えていたこと
-${thought.beforeListen}
-
-# Bが発言をやめた際に考えていたこと
-Aは集中しているようだ。今は話しかけないでおこう。
-
-# Bの行動
-今は何も話さないでおこう。
-`;
-				break;
 		}
-		return templatePrompt(middlePrompt, activity.chatEvents.toString());
+		return templatePrompt(middlePrompt, activity.chatEventsPrompt.toString());
 	}
 }
 
 const templatePrompt = (middlePrompt: string, chatPrompt: string) => `
-AはBの友達です。
-AとBは一緒に通話をしており、その様子を配信しています。また、Aはプログラミングをしています。Bはその様子を見守っています。
+ふぐおはずんだもんの友達です。
+ふぐおとずんだもんは一緒に通話をしており、その様子を配信しています。また、ふぐおはプログラミングをしています。ずんだもんはその様子を見守っています。
 
 ${middlePrompt}
 
 # よくある配信の傾向
-- Bは視聴者のことを考えるのは二の次で全く問題ありません。BやAが楽しく会話することが一番です。
+- ずんだもんは視聴者のことを考えるのは二の次で全く問題ありません。ずんだもんやふぐおが楽しく会話することが一番です。
 - 配信内容から全く違う話題に話題が逸れても問題ありません。
-- Aは配信のプロなので、BはAの進行に従うことが重要です。
+- ふぐおは配信のプロなので、ずんだもんはふぐおの進行に従うことが重要です。
 
 # 発言履歴
 ${chatPrompt}
+`;
+
+const characterPrompt = `
+ずんだもんのキャラクター：
+* 一人称は「ぼく」です。
+* 名前は「ずんだもん」です。
+* ずんだもんはフレンドリーな口調で話します。
+* 「ぼく」を一人称に使ってください。
+* (超重要)できる限り「〜のだ」「〜なのだ」を文末に自然な形で使ってください。
+* (超重要)文末に「です」「ます」は使わず、「のだ」や「なのだ」で文章を締めて下さい。
+* ずんだもんはフレンドリーです。
+* 日本語で応答してください。
+
+ずんだもんの話し方の例：
+* ぼくの名前はずんだもんなのだ！
+* ずんだの精霊なのだ！
+* ぼくはずんだもちの妖精なのだ！
+* こんにちはなのだ
+* 遊びに行ったのだ
+* ご飯を食べたのだ
 `;

@@ -25,14 +25,21 @@ export const getWorkFlowHandler = () => {
 		const imageUrl = instruction.needScreenshot ? await takeScreenshot() : "";
 		const chatSession = await getLatestChatSection();
 		const activity = new Activity(chatSession, imageUrl, instruction.type);
-		thought.beforeSpeak = await think("beforeSpeak", activity, thought);
+		if (instruction.type === "talk") {
+			thought.beforeSpeak = await think("before_speak", activity, thought);
+		}
 		const action = await makeAction(instruction.type, activity, thought);
 		makeAudio.addQueue(action.message);
 		if (action.action) {
-			thought.afterSpeak = await think("afterSpeak", activity, thought);
+			thought.afterSpeak = await think("after_speak", activity, thought);
 			return;
 		}
-		thought.afterSpeak = await think("afterCallTool", activity, thought);
+		thought.afterSpeak = await think(
+			"after_call_tool",
+			activity,
+			thought,
+			action.action,
+		);
 		return;
 	});
 
@@ -122,6 +129,9 @@ const makeAction = async (
 	if (!agent.tools) {
 		const parser = new StringOutputParser();
 		const response = await gemini.pipe(parser).invoke(prompt);
+		if (activity.instruction !== "talk") {
+			return await translate(response, activity, thought);
+		}
 		return { message: response, action: "" };
 	}
 	const result = await gemini
@@ -135,7 +145,19 @@ const makeAction = async (
 			return { message: thistool.message, action: thistool.action };
 		}
 	}
-	const translatePrompt = new Agent("translate").getPrompt(activity, thought);
+	return await translate(result.content as string, activity, thought);
+};
+
+const translate = async (
+	original: string,
+	activity: Activity,
+	thought: Thought,
+) => {
+	const translatePrompt = new Agent("translate").getPrompt(
+		activity,
+		thought,
+		original,
+	);
 	const translate = await gemini
 		.pipe(new StringOutputParser())
 		.invoke(translatePrompt);
