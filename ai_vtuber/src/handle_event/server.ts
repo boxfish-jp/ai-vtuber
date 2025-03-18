@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { Server } from "socket.io";
 import { z } from "zod";
 import endpointJson from "../../../endpoint.json";
+import type { workTheme } from "../work_flow/tool/work_theme.js";
 import type { ChatEvent, InstructionEvent } from "./event.js";
 import type { EventHandler } from "./event_handler.js";
 
@@ -14,6 +15,11 @@ const chatEventSchema = z.object({
 	content: z.string(),
 	unixTime: z.number(),
 	point: z.boolean(),
+});
+
+const workThemeSchema = z.object({
+	main: z.string(),
+	sub: z.array(z.string()),
 });
 
 const instructionEventSchema = z.object({
@@ -64,6 +70,16 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 		},
 	);
 
+	const appWorkThemePost = app.post(
+		"/work_theme",
+		zValidator("json", workThemeSchema),
+		(c) => {
+			const data: typeof workTheme = c.req.valid("json");
+			ioServer.emit("work_theme", JSON.stringify(data));
+			return c.text("ok");
+		},
+	);
+
 	ioServer.on("connection", (socket) => {
 		socket.on("chat", (msg: string) => {
 			const receivedMessage: ChatEvent = chatEventSchema.parse(JSON.parse(msg));
@@ -91,5 +107,5 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 		});
 	});
 
-	return appChatPost;
+	return { appChatPost, appWorkThemePost };
 };
