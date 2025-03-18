@@ -64,7 +64,7 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 		zValidator("json", chatEventSchema),
 		(c) => {
 			const data: ChatEvent = c.req.valid("json");
-			ioServer.emit(JSON.stringify(data));
+			ioServer.emit("chat", JSON.stringify(data));
 			eventHandler.emit("onChat", data);
 			return c.text("ok");
 		},
