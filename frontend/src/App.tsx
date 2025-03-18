@@ -18,32 +18,37 @@ import {
 } from "./components/ui/table";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
-import { sendEvent, type socketServerChatType, watchChat } from "./lib/socket";
-import { speechRecognition } from "./lib/speechrecognition";
+import { SocketControler, type socketServerChatType } from "./lib/socket";
+import { Recognition } from "./lib/speechrecognition";
 
 const formSchema = z.object({
-	type: z
-		.enum(["talk", "work_theme", "afk", "back", "grade", "reminder", "reset"])
-		.default("talk"),
+	type: z.enum(["talk", "work_theme", "afk", "back", "grade"]).default("talk"),
 	unixTime: z.string().default(""),
 	needScreenshot: z.boolean().default(false),
 });
 
 function App() {
 	const [chats, setChats] = useState<socketServerChatType[]>([]);
+	const [recognition] = useState<Recognition>(Recognition.instance);
+	const [socket] = useState<SocketControler>(SocketControler.instance);
 	const listEndRef = useRef<HTMLTableRowElement>(null);
 	const { toast } = useToast();
 
 	useEffect(() => {
-		speechRecognition((eventName, content) => {
-			sendEvent(eventName, content);
+		const recognitionRemove = recognition.setEvent((eventName, content) => {
+			socket.sendEvent(eventName, content);
 		});
-		watchChat((chat) => {
+		const removeWatchChat = socket.watchChat((chat) => {
 			setChats((prev) => [...prev, chat]);
 			listEndRef.current?.scrollIntoView({ behavior: "smooth" });
 			console.log("chats", chats);
 		});
-	}, []);
+
+		return () => {
+			recognitionRemove();
+			removeWatchChat();
+		};
+	}, [chats, recognition, socket]);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -54,7 +59,7 @@ function App() {
 		toast({
 			title: "AIに送信しました",
 		});
-		sendEvent(
+		socket.sendEvent(
 			"instruction",
 			JSON.stringify({
 				type: data.type,
