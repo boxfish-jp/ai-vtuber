@@ -6,7 +6,7 @@ import { Hono } from "hono";
 import { Server } from "socket.io";
 import { z } from "zod";
 import endpointJson from "../../../endpoint.json";
-import type { workTheme } from "../work_flow/tool/work_theme.js";
+import { workTheme } from "../work_flow/tool/work_theme.js";
 import type { ChatEvent, InstructionEvent } from "./event.js";
 import type { EventHandler } from "./event_handler.js";
 
@@ -22,8 +22,16 @@ const workThemeSchema = z.object({
 	sub: z.array(z.string()),
 });
 
+const instructionTypeEnum = [
+	"talk",
+	"work_theme",
+	"afk",
+	"back",
+	"grade",
+] as const;
+
 const instructionEventSchema = z.object({
-	type: z.enum(["talk", "work_theme", "afk", "back", "grade"]),
+	type: z.enum(instructionTypeEnum),
 	unixTime: z.string(),
 	needScreenshot: z.boolean(),
 });
@@ -51,6 +59,11 @@ const ioServer = new Server(server as HttpServer, {
 });
 
 export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
+	app.get("/", (c) => {
+		console.log("Hello, World!");
+		return c.text("Hello, World!");
+	});
+
 	const appChatPost = app.post(
 		"/chat",
 		zValidator("json", chatEventSchema),
@@ -71,6 +84,21 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 			return c.text("ok");
 		},
 	);
+
+	const appTalkPost = app.post("", (c) => {
+		const instruction = c.req.query("inst");
+		const event: InstructionEvent = {
+			type:
+				instruction &&
+				instructionTypeEnum.includes(instruction as InstructionEvent["type"])
+					? (instruction as InstructionEvent["type"])
+					: "talk",
+			unixTime: undefined,
+			needScreenshot: false,
+		};
+		eventHandler.emit("onInstruction", event);
+		return c.text("ok");
+	});
 
 	ioServer.on("connection", (socket) => {
 		socket.on("chat", (msg: string) => {
@@ -97,6 +125,8 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 			};
 			eventHandler.emit("onInstruction", instructionEvent);
 		});
+
+		ioServer.emit("work_theme", JSON.stringify(workTheme));
 	});
 
 	return { appChatPost, appWorkThemePost };
