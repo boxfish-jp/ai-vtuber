@@ -38,7 +38,7 @@ const fetchAudioQuery = async (text: string): Promise<unknown> => {
 		`http://${endpointJson.TTS.ip}:${endpointJson.TTS.port}/audio_query`,
 	);
 	url.searchParams.append("text", text);
-	url.searchParams.append("speaker", "2");
+	url.searchParams.append("speaker", "3");
 	try {
 		const res = await fetch(url.toString(), {
 			method: "POST",
@@ -58,7 +58,7 @@ const fetchSynthesis = async (
 		`http://${endpointJson.TTS.ip}:${endpointJson.TTS.port}/synthesis`,
 	);
 	url.searchParams.append("text", text);
-	url.searchParams.append("speaker", "2");
+	url.searchParams.append("speaker", "3");
 	try {
 		const res = await fetch(url, {
 			method: "POST",

@@ -1,13 +1,13 @@
 import { hc } from "hono/client";
 import endpointJson from "../../../../../endpoint.json";
-import type { appChatPostType } from "../event/server.js";
+import type { restPostChatType } from "../../../index.js";
 
 export const play = async (
 	audioData: ArrayBuffer,
 	text: string,
 ): Promise<void> => {
 	const url = `http://${endpointJson.ai_vtuber.address}:${endpointJson.ai_vtuber.port}`;
-	const response = await hc<appChatPostType>(url).chat.$post({
+	const response = await hc<restPostChatType>(url).chat.$post({
 		json: {
 			who: "ai",
 			content: text,
@@ -20,7 +20,7 @@ export const play = async (
 		console.log(` Failed to post ai_vtuber server:${response.statusText}`);
 	}
 	try {
-		const url = `http://${endpointJson.audio.ip}:${endpointJson.audio.port}`;
+		const url = `http://${endpointJson.audio.ip}:${endpointJson.audio.port}?channel=1`;
 		const response = await fetch(url, {
 			method: "POST",
 			headers: {

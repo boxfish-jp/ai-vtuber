@@ -5,7 +5,7 @@
   },
   "audio": {
     "ip": "localhost",
-    "port": "4000"
+    "port": "8686"
   },
   "TTS": {
     "ip": "localhost",
