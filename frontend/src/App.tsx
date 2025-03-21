@@ -4,7 +4,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ChatTable } from "./Chat_table";
 import { Controller } from "./Controller";
+import { Setting } from "./Setting";
 import { Button } from "./components/ui/button";
+import { Drawer, DrawerTrigger } from "./components/ui/drawer";
 import { Form } from "./components/ui/form";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
@@ -63,7 +65,7 @@ function App() {
 	};
 
 	return (
-		<div>
+		<Drawer>
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
@@ -81,8 +83,12 @@ function App() {
 					</Button>
 				</form>
 			</Form>
+			<DrawerTrigger asChild className="ms-5">
+				<Button variant="outline">設定を開く</Button>
+			</DrawerTrigger>
 			<Toaster />
-		</div>
+			<Setting socket={socket} />
+		</Drawer>
 	);
 }
 

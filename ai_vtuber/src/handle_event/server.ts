@@ -3,6 +3,7 @@ import type { Server as HttpServer } from "node:http";
 import { serve } from "@hono/node-server";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { Server } from "socket.io";
 import { z } from "zod";
 import endpointJson from "../../../endpoint.json";
@@ -37,6 +38,14 @@ const instructionEventSchema = z.object({
 });
 
 const app = new Hono();
+
+app.use(
+	"/*",
+	cors({
+		origin: "*",
+		allowMethods: ["GET", "POST"],
+	}),
+);
 
 const server = serve(
 	{

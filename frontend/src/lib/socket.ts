@@ -8,6 +8,11 @@ export interface socketServerChatType {
 	point: boolean;
 }
 
+export interface WorkTheme {
+	main: string;
+	sub: string[];
+}
+
 export class SocketControler {
 	private _socket: Socket;
 	private static _instance: SocketControler;
@@ -45,6 +50,20 @@ export class SocketControler {
 
 	sendEvent(eventName: string, content: string): void {
 		this._socket.emit(eventName, content);
+	}
+
+	watchWorkTheme(callback: (newWorkTheme: WorkTheme) => void) {
+		const onWorkTheme = (event: string) => {
+			const workTheme = JSON.parse(event) as WorkTheme;
+			console.log(workTheme);
+			callback(workTheme);
+		};
+
+		this._socket.on("work_theme", onWorkTheme);
+
+		return () => {
+			this._socket.off("work_theme", onWorkTheme);
+		};
 	}
 }
 
