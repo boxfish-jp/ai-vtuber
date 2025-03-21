@@ -26,6 +26,7 @@ const workThemeSchema = z.object({
 const instructionTypeEnum = [
 	"talk",
 	"work_theme",
+	"cli",
 	"afk",
 	"back",
 	"grade",

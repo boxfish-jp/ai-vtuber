@@ -38,22 +38,16 @@ export const Controller = ({
 							defaultValue="talk"
 							className="flex gap-4"
 						>
-							{[
-								"talk",
-								"work_theme",
-								"afk",
-								"back",
-								"grade",
-								"reminder",
-								"reset",
-							].map((type) => (
-								<div key={type}>
-									<RadioGroupItem value={type} id={type} />
-									<Label className="ms-1" htmlFor={type}>
-										{type}
-									</Label>
-								</div>
-							))}
+							{["talk", "work_theme", "cli", "afk", "back", "grade"].map(
+								(type) => (
+									<div key={type}>
+										<RadioGroupItem value={type} id={type} />
+										<Label className="ms-1" htmlFor={type}>
+											{type}
+										</Label>
+									</div>
+								),
+							)}
 						</RadioGroup>
 					</FormControl>
 				</FormItem>
