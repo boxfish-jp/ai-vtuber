@@ -1,6 +1,6 @@
-let aiTalkingTime: number = new Date().getTime();
-let fuguoTalkingTime: number = new Date().getTime();
-let viewerTalkingTime: number = new Date().getTime();
+let aiTalkingTime: number = Date.now();
+let fuguoTalkingTime: number = Date.now();
+let viewerTalkingTime: number = Date.now();
 
 interface talkStateDataType {
 	talking: boolean;
@@ -17,7 +17,7 @@ class ViewerState implements talkStateDataType {
 		viewerTalkingTime = Date.now();
 	}
 	get silence() {
-		return Date.now() - viewerTalkingTime > 20000 && !viewerTalkingTime;
+		return Date.now() - viewerTalkingTime > 5000 && !this.talking;
 	}
 
 	get waiting() {
