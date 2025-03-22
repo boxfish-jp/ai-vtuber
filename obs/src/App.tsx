@@ -18,15 +18,17 @@ export const App = () => {
 
 	useEffect(() => {
 		const chatRemove = socketControler.watchChat((chat) => {
-			if (subtitle.timeout) {
-				clearTimeout(subtitle.timeout);
+			if (chat.who === "ai") {
+				if (subtitle.timeout) {
+					clearTimeout(subtitle.timeout);
+				}
+				setSubtitle({
+					timeout: setTimeout(() => {
+						setSubtitle({ content: "", timeout: undefined });
+					}, 5000),
+					content: chat.content,
+				});
 			}
-			setSubtitle({
-				timeout: setTimeout(() => {
-					setSubtitle({ content: "", timeout: undefined });
-				}, 5000),
-				content: chat.content,
-			});
 		});
 
 		const workThemeRemove = socketControler.watchWorkTheme((workTheme) => {
