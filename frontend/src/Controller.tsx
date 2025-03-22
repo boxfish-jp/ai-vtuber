@@ -5,6 +5,7 @@ import { FormControl, FormField, FormItem } from "./components/ui/form";
 import { Label } from "./components/ui/label";
 import { RadioGroup, RadioGroupItem } from "./components/ui/radio-group";
 import { Switch } from "./components/ui/switch";
+import { instructions } from "./lib/instructions";
 
 export const Controller = ({
 	form,
@@ -38,16 +39,14 @@ export const Controller = ({
 							defaultValue="talk"
 							className="flex gap-4"
 						>
-							{["talk", "work_theme", "cli", "afk", "back", "grade"].map(
-								(type) => (
-									<div key={type}>
-										<RadioGroupItem value={type} id={type} />
-										<Label className="ms-1" htmlFor={type}>
-											{type}
-										</Label>
-									</div>
-								),
-							)}
+							{instructions.map((type) => (
+								<div key={type}>
+									<RadioGroupItem value={type} id={type} />
+									<Label className="ms-1" htmlFor={type}>
+										{type}
+									</Label>
+								</div>
+							))}
 						</RadioGroup>
 					</FormControl>
 				</FormItem>

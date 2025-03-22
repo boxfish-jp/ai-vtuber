@@ -10,11 +10,12 @@ import { Drawer, DrawerTrigger } from "./components/ui/drawer";
 import { Form } from "./components/ui/form";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
+import { instructions } from "./lib/instructions";
 import { SocketControler, type socketServerChatType } from "./lib/socket";
 import { Recognition } from "./lib/speechrecognition";
 
 export const formSchema = z.object({
-	type: z.enum(["talk", "work_theme", "afk", "back", "grade"]).default("talk"),
+	type: z.enum(instructions).default("talk"),
 	unixTime: z.string().default(""),
 	needScreenshot: z.boolean().default(false),
 });
