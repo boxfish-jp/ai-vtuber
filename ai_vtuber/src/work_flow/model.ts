@@ -15,7 +15,6 @@ let _localModel: ChatOllama;
 const getGemini = (modelName: string) => {
 	const gemini = new ChatVertexAI({
 		model: modelName,
-		maxOutputTokens: 100,
 		safetySettings: [
 			{
 				category: "HARM_CATEGORY_HARASSMENT",
