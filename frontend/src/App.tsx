@@ -33,13 +33,13 @@ function App() {
 		});
 		const removeWatchChat = socket.watchChat((chat) => {
 			setChats((prev) => [...prev, chat]);
-			listEndRef.current?.scrollIntoView({ behavior: "smooth" });
 			console.log("chats", chats);
 		});
 
 		return () => {
 			recognitionRemove();
 			removeWatchChat();
+			listEndRef.current?.scrollIntoView({ behavior: "smooth" });
 		};
 	}, [chats, recognition, socket]);
 
