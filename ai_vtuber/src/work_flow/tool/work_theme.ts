@@ -24,7 +24,7 @@ export const workThemeConfirm = {
 			}),
 		},
 	),
-	message: "設定したよ",
+	message: "設定したのだ",
 	action: "配信UIに表示する作業内容を反映させた。",
 };
 
@@ -48,7 +48,7 @@ export const addTaskConfirm = {
 			}),
 		},
 	),
-	message: "設定したよ",
+	message: "設定したのだ",
 	action: "配信UIに表示する作業内容を反映させた。",
 };
 
