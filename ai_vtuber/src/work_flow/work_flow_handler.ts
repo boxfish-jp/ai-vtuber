@@ -28,6 +28,11 @@ export const getWorkFlowHandler = () => {
 		if (instruction.type === "talk") {
 			thought.beforeSpeak = await think("before_speak", activity, thought);
 		}
+		if (instruction.type === "progress") {
+			makeAudio.addQueue("進捗はどうなのだ。");
+			thought.afterSpeak = await think("after_speak", activity, thought);
+			return;
+		}
 		const action = await makeAction(instruction.type, activity, thought);
 		makeAudio.addQueue(action.message);
 		if (action.action) {

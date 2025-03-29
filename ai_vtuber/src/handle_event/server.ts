@@ -30,6 +30,7 @@ const instructionTypeEnum = [
 	"afk",
 	"back",
 	"grade",
+	"progress",
 ] as const;
 
 const instructionEventSchema = z.object({
