@@ -1,4 +1,5 @@
 import EventEmitter from "node:events";
+import { MakeAudio } from "../work_flow/tool/make_audio/make_audio.js";
 import type { WorkFlowHandler } from "../work_flow/work_flow_handler.js";
 import { characterState } from "./character_state.js";
 import { insertChatDb, makeAsPointed } from "./chat_db.js";
@@ -8,6 +9,7 @@ export interface EventHandler {
 	onFuguoSound: [soundIsOn: boolean];
 	onInstruction: [instruction: InstructionEvent];
 	onChat: [chat: ChatEvent];
+	onInterrupt: [];
 }
 
 export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
@@ -46,6 +48,11 @@ export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
 		if (chat.who === "fuguo") {
 			workFlow.emit("onFuguoChat");
 		}
+	});
+
+	eventHandler.on("onInterrupt", () => {
+		const makeAudio = MakeAudio.getInstance();
+		makeAudio.interrupt(true);
 	});
 
 	return eventHandler;

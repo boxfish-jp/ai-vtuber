@@ -1,36 +1,52 @@
 import { sleep } from "../../../lib/sleep.js";
-import { play } from "./play.js";
 import { splitSentences } from "./splitSentences.js";
 import { VoicevoxAudio, type VoicevoxAudioType } from "./voicevox.js";
 
 export class MakeAudio {
-	private waitingQueue: string[] = [];
+	private _waitingQueue: string[] = [];
+	private _isInterrupt = false;
 
-	constructor() {
+	private static _makeAudio: undefined | MakeAudio = undefined;
+
+	static getInstance = () => {
+		if (!MakeAudio._makeAudio) {
+			MakeAudio._makeAudio = new MakeAudio();
+		}
+		return MakeAudio._makeAudio;
+	};
+
+	private constructor() {
 		this.start();
+	}
+
+	interrupt(interrupt: boolean) {
+		this._isInterrupt = interrupt;
 	}
 
 	async addQueue(text: string): Promise<void> {
 		const sentences = splitSentences(text);
 		for (const sentence of sentences) {
-			this.waitingQueue.push(sentence);
+			this._waitingQueue.push(sentence);
 		}
 	}
 
 	async start() {
 		while (true) {
-			if (this.waitingQueue.length > 0) {
+			if (this._waitingQueue.length > 0) {
 				const audioQueue: VoicevoxAudioType[] = [];
-				for (const text of this.waitingQueue) {
+				for (const text of this._waitingQueue) {
 					audioQueue.push(new VoicevoxAudio(text));
 				}
-				this.waitingQueue = [];
+				this._waitingQueue = [];
 				this._createAudios(audioQueue);
 				for (const audio of audioQueue) {
 					console.log("audio", audio.text);
-					await audio.play();
+					if (!this._isInterrupt) {
+						await audio.play();
+					}
 				}
 			}
+			this._isInterrupt = false;
 			await sleep(1000);
 		}
 	}

@@ -18,7 +18,7 @@ export interface WorkFlowHandler {
 export const getWorkFlowHandler = () => {
 	const workFlowHandler = new EventEmitter<WorkFlowHandler>();
 	const thought = new Thought("配信が始まりました。");
-	const makeAudio = new MakeAudio();
+	const makeAudio = MakeAudio.getInstance();
 	const thinkQueue = new ThinkQueue();
 
 	workFlowHandler.on("onInstruction", async (instruction) => {
