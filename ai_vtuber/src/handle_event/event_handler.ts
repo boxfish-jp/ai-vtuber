@@ -24,10 +24,12 @@ export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
 	});
 
 	eventHandler.on("onInstruction", async (instruction) => {
+		let sechtionChanged = false;
 		if (characterState.talking) {
+			sechtionChanged = true;
 			await makeAsPointed(instruction.unixTime || Date.now());
 		}
-		workFlow.emit("onInstruction", instruction);
+		workFlow.emit("onInstruction", instruction, sechtionChanged);
 	});
 
 	eventHandler.on("onChat", async (chat) => {
