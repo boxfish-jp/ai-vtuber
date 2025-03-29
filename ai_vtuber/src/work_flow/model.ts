@@ -41,4 +41,4 @@ const getGemini = (modelName: string) => {
 	return gemini;
 };
 
-export const gemini = getGemini("gemini-2.0-flash-lite-preview-02-05");
+export const gemini = getGemini("gemini-2.0-flash-lite");
