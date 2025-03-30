@@ -2,6 +2,10 @@ import endpointJson from "../../../../../endpoint.json";
 import { sleep } from "../../../lib/sleep.js";
 import { play } from "./play.js";
 
+const speaker = {
+	ずんだもん: 3,
+};
+
 export interface VoicevoxAudioType {
 	text: string;
 	create(): Promise<void>;
@@ -38,7 +42,7 @@ const fetchAudioQuery = async (text: string): Promise<unknown> => {
 		`http://${endpointJson.TTS.ip}:${endpointJson.TTS.port}/audio_query`,
 	);
 	url.searchParams.append("text", text);
-	url.searchParams.append("speaker", "3");
+	url.searchParams.append("speaker", speaker.ずんだもん.toString());
 	try {
 		const res = await fetch(url.toString(), {
 			method: "POST",
