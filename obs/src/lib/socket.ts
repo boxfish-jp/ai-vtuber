@@ -13,11 +13,21 @@ export interface WorkTheme {
 	sub: string[];
 }
 
-export class SocketControler {
-	private _socket: Socket;
-	private static _instance: SocketControler;
+export const watchChat = (
+	callback: (newChat: socketServerChatType) => void,
+): void => {
+	const socket = getSocketControler();
+	socket.watchChat(callback);
+};
 
-	private constructor() {
+interface SocketControlerType {
+	watchChat(callback: (newChat: socketServerChatType) => void): void;
+}
+
+class SocketControler implements SocketControlerType {
+	private _socket: Socket;
+
+	constructor() {
 		const wsEndpoint = getWsEndpoint();
 		if (!wsEndpoint) {
 			throw new Error("WS_URL is not set");
@@ -28,28 +38,19 @@ export class SocketControler {
 		});
 	}
 
-	static instance() {
-		if (!SocketControler._instance) {
-			SocketControler._instance = new SocketControler();
-		}
-		return SocketControler._instance;
-	}
-
 	watchChat(callback: (newChat: socketServerChatType) => void) {
-		const func = (event: string) => {
+		const onChat = (event: string) => {
 			console.log(event);
 			const chat = JSON.parse(event) as socketServerChatType;
 			console.log(chat);
 			callback(chat);
 		};
-		this._socket.on("chat", func);
-		return () => {
-			this._socket.off("chat", func);
-		};
-	}
 
-	sendEvent(eventName: string, content: string): void {
-		this._socket.emit(eventName, content);
+		this._socket.on("chat", onChat);
+
+		return () => {
+			this._socket.off("chat", onChat);
+		};
 	}
 
 	watchWorkTheme(callback: (newWorkTheme: WorkTheme) => void) {
@@ -66,6 +67,15 @@ export class SocketControler {
 		};
 	}
 }
+
+let socketControler: SocketControler | undefined;
+
+export const getSocketControler = (): SocketControler => {
+	if (!socketControler) {
+		socketControler = new SocketControler();
+	}
+	return socketControler;
+};
 
 const getWsEndpoint = (): string => {
 	return `http://${endpointJson.ai_vtuber.address}:${endpointJson.ai_vtuber.port}`;

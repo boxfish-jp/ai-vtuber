@@ -1,5 +1,5 @@
 {
-	"name": "frontend",
+	"name": "obs",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
@@ -10,17 +10,8 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@hookform/resolvers": "^3.9.1",
-		"@radix-ui/react-dialog": "^1.1.6",
-		"@radix-ui/react-label": "^2.1.1",
-		"@radix-ui/react-radio-group": "^1.2.2",
-		"@radix-ui/react-scroll-area": "^1.2.2",
-		"@radix-ui/react-slot": "^1.1.1",
-		"@radix-ui/react-switch": "^1.1.2",
-		"@radix-ui/react-toast": "^1.2.4",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"hono": "^4.7.4",
 		"lucide-react": "^0.469.0",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
@@ -28,7 +19,6 @@
 		"socket.io-client": "^4.8.1",
 		"tailwind-merge": "^2.5.5",
 		"tailwindcss-animate": "^1.0.7",
-		"vaul": "^1.1.2",
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
@@ -44,6 +34,7 @@
 		"tailwindcss": "^3.4.17",
 		"typescript": "~5.6.2",
 		"typescript-eslint": "^8.18.1",
-		"vite": "^6.0.3"
+		"vite": "^6.0.3",
+		"vite-plugin-singlefile": "^2.2.0"
 	}
 }
