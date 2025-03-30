@@ -1,7 +1,7 @@
 import { type Chat, PrismaClient } from "@prisma/client";
-import type { chatEvent } from "../../event/event.js";
+import type { ChatEvent } from "./event.js";
 
-export const insertChatDb = async (event: chatEvent): Promise<Chat> => {
+export const insertChatDb = async (event: ChatEvent): Promise<Chat> => {
 	const created = prismaClient.chat.create({
 		data: {
 			unixTime: BigInt(event.unixTime),
@@ -19,7 +19,7 @@ export const deleteChatDb = async (unixTime: bigint): Promise<void> => {
 	});
 };
 
-export const getLatestChatSection = async (): Promise<chatEvent[]> => {
+export const getLatestChatSection = async (): Promise<ChatEvent[]> => {
 	const maxPointId = await prismaClient.chat.findFirst({
 		where: { point: true },
 		orderBy: { id: "desc" },
@@ -39,14 +39,16 @@ export const getLatestChatSection = async (): Promise<chatEvent[]> => {
 	return chatBigintToNumber(chatData);
 };
 
-export const makeAsPointed = async (unixTime: number): Promise<void> => {
-	await prismaClient.chat.updateMany({
-		where: { unixTime: BigInt(unixTime) },
-		data: { point: true },
-	});
-};
-
-export const makeLatestAsPointed = async (): Promise<void> => {
+export const makeAsPointed = async (
+	unixTime: number | undefined,
+): Promise<void> => {
+	if (unixTime) {
+		await prismaClient.chat.updateMany({
+			where: { unixTime: BigInt(unixTime) },
+			data: { point: true },
+		});
+		return;
+	}
 	const maxUnixTime = await prismaClient.chat.findFirst({
 		orderBy: { unixTime: "desc" },
 		select: { unixTime: true },
@@ -57,8 +59,8 @@ export const makeLatestAsPointed = async (): Promise<void> => {
 	await makeAsPointed(Number(maxUnixTime.unixTime));
 };
 
-const chatBigintToNumber = (chats: Chat[]): chatEvent[] => {
-	const events: chatEvent[] = chats.map((chat) => {
+const chatBigintToNumber = (chats: Chat[]): ChatEvent[] => {
+	const events: ChatEvent[] = chats.map((chat) => {
 		if (
 			!(
 				chat.who === "viewer" ||

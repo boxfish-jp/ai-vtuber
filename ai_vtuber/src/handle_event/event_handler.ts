@@ -27,7 +27,7 @@ export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
 		let sechtionChanged = false;
 		if (characterState.talking) {
 			sechtionChanged = true;
-			await makeAsPointed(instruction.unixTime || Date.now());
+			await makeAsPointed(instruction.unixTime);
 		}
 		workFlow.emit("onInstruction", instruction, sechtionChanged);
 	});
