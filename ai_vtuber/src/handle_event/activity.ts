@@ -82,33 +82,6 @@ class InputPrompt {
 		this._chatEvent = chatEvent;
 	}
 
-	toString(isContainViewer = true) {
-		throw new Error("たぶんバグあるよ。InputPrompt.this.toString");
-		/*
-		let inputText = "";
-		for (let i = this._chatEvent.length - 1; i >= 0; i--) {
-			const chat = this._chatEvent[i];
-			if (chat.who === "ai") {
-				break;
-			}
-			switch (chat.who) {
-				case "fuguo":
-					inputText = `ふぐお「${chat.content}」${inputText}`;
-					break;
-				case "viewer":
-					if (isContainViewer) {
-						inputText = `視聴者「${chat.content}」${inputText}`;
-					}
-					break;
-				case "info":
-					inputText = `info「${chat.content}」${inputText}`;
-					break;
-			}
-		}
-		return inputText;
-      */
-	}
-
 	get onlyLast(): ChatEvent {
 		return this._chatEvent[this._chatEvent.length - 1];
 	}
