@@ -1,7 +1,7 @@
 import type { Activity } from "../handle_event/activity.js";
 import type { Thought } from "./thought.js";
 import { cliTool } from "./tool/cli.js";
-import { addTaskConfirm, workThemeConfirm } from "./tool/work_theme.js";
+import { workThemeConfirm } from "./tool/work_theme.js";
 
 export type AgentType =
 	| "before_speak"
@@ -32,7 +32,7 @@ export class Agent {
 			case "cli":
 				return { cliTool };
 			case "work_theme":
-				return { workThemeConfirm, addTaskConfirm };
+				return { workThemeConfirm };
 			case "after_call_tool":
 			case "translate":
 			case "after_speak":
@@ -75,6 +75,7 @@ ${addition}
 - ずんだもんの発言以外のものも発言してはいけません。
 - ずんだもん「~~」のような誰が喋っているかの情報も不要です。
 - ずんだもん以外の人物の発言も不要です。
+- (重要)何があってもふぐおをほめる発言をしないでください。(例:ふぐおはすごいのだなどの発言はしてはいけない。)
 
 ${characterPrompt}
 
