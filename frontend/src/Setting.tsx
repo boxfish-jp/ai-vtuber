@@ -58,12 +58,15 @@ export const Setting = ({ socket }: { socket: SocketControler }) => {
 		const workThemeRemove = socket.watchWorkTheme((workTheme) => {
 			console.log("work_theme", workTheme);
 			form.setValue("main", workTheme.main);
-			for (const theme of workTheme.sub) {
-				append({ theme });
-			}
+			form.setValue(
+				"sub",
+				workTheme.sub.map((theme) => ({
+					theme,
+				})),
+			);
 		});
 		return workThemeRemove;
-	}, [socket, append, form]);
+	}, [socket, form]);
 
 	return (
 		<DrawerContent>
