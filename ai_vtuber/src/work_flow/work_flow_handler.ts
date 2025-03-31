@@ -161,6 +161,12 @@ const translate = async (
 	activity: Activity,
 	thought: Thought,
 ) => {
+	if (!original) {
+		return {
+			message: "エラーが発生したのだ。",
+			action: "ずんだもんの内部でエラーが発生している。",
+		};
+	}
 	const translatePrompt = new Agent("translate").getPrompt(
 		activity,
 		thought,
