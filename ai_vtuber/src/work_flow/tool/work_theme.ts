@@ -7,30 +7,6 @@ import type { restPostWorkThemeType } from "../../index.js";
 export const workThemeConfirm = {
 	tool: tool(
 		({ input }: { input: string }): string => {
-			workTheme.main = input;
-			hc<restPostWorkThemeType>(
-				`http:${endpointJson.ai_vtuber.address}:${endpointJson.ai_vtuber.port}`,
-			).work_theme.$post({
-				json: workTheme,
-			});
-			return `作業内容を「${input}」に更新したよ。`;
-		},
-		{
-			name: "workThemeConfirm",
-			description:
-				"inputに今日作っている物についての要約を入力すると、今日作っている物を配信UI上の表示の変更ができます。",
-			schema: z.object({
-				input: z.string(),
-			}),
-		},
-	),
-	message: "設定したのだ",
-	action: "配信UIに表示する作業内容を反映させた。",
-};
-
-export const addTaskConfirm = {
-	tool: tool(
-		({ input }: { input: string }): string => {
 			workTheme.sub.push(input);
 			hc<restPostWorkThemeType>(
 				`http:${endpointJson.ai_vtuber.address}:${endpointJson.ai_vtuber.port}`,
@@ -40,9 +16,12 @@ export const addTaskConfirm = {
 			return `作業内容を「${input}」に更新したよ。`;
 		},
 		{
-			name: "addTaskConfirm",
-			description:
-				"inputに現在の作業内容の要約を入力すると、作業内容を配信UI上の表示の変更ができます。",
+			name: "workThemeConfirm",
+			description: `
+inputに作業内容を入力すると、作業内容を配信UI上の表示の変更ができます。
+ただし、inputには要約した作業内容を入力してください。
+例:「ずんだもん作業内容をリファクタリングに変えて」=> input=リファクタリング
+`,
 			schema: z.object({
 				input: z.string(),
 			}),
