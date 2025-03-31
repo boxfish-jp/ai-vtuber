@@ -40,7 +40,7 @@ export const ChatTable = ({
 								}}
 								defaultValue={field.value?.toString()}
 							>
-								<ScrollArea className=" h-[80vh]">
+								<ScrollArea className="h-[75vh]">
 									<Table>
 										<TableHeader>
 											<TableRow>
