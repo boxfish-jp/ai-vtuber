@@ -1,6 +1,6 @@
 import type { Activity } from "../handle_event/activity.js";
 import type { Thought } from "./thought.js";
-import { cliTool } from "./tool/cli.js";
+import { cli } from "./tool/cli.js";
 import { workThemeConfirm } from "./tool/work_theme.js";
 
 export type AgentType =
@@ -30,7 +30,7 @@ export class Agent {
 	get tools() {
 		switch (this.name) {
 			case "cli":
-				return { cliTool };
+				return { cli };
 			case "work_theme":
 				return { workThemeConfirm };
 			case "after_call_tool":
