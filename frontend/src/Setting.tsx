@@ -73,56 +73,75 @@ export const Setting = ({ socket }: { socket: SocketControler }) => {
 			<DrawerHeader>
 				<DrawerTitle>work_theme設定</DrawerTitle>
 			</DrawerHeader>
-			<Form {...form}>
-				<form
-					className="flex flex-col gap-2 mx-8"
-					onSubmit={form.handleSubmit(onSubmit)}
-				>
-					<section>
-						<p>main</p>
-						<FormField
-							control={form.control}
-							name="main"
-							render={({ field }) => (
-								<FormItem>
-									<FormControl>
-										<Textarea placeholder="Input Prompt" {...field} />
-									</FormControl>
-								</FormItem>
-							)}
-						/>
-					</section>
-					<section>
-						<p>sub</p>
-						{fields.map((field, index) => {
-							return (
-								<div
-									key={field.id}
-									className="flex flex-row items-center gap-4"
-								>
-									<FormField
-										control={form.control}
-										name={`sub.${index}.theme`}
-										render={({ field }) => (
-											<FormItem className="flex-grow">
-												<FormControl>
-													<Textarea placeholder="Input Prompt" {...field} />
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-									<div>
-										<Button type="button" onClick={() => remove(index)}>
-											delete
-										</Button>
+			<div className="mb-8">
+				<Form {...form}>
+					<form
+						className="flex flex-col gap-2 mx-8"
+						onSubmit={form.handleSubmit(onSubmit)}
+					>
+						<section>
+							<p>main</p>
+							<FormField
+								control={form.control}
+								name="main"
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<Textarea placeholder="Input Prompt" {...field} />
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+						</section>
+						<section>
+							<p>sub</p>
+							{fields.map((field, index) => {
+								return (
+									<div
+										key={field.id}
+										className="flex flex-row items-center gap-4"
+									>
+										<FormField
+											control={form.control}
+											name={`sub.${index}.theme`}
+											render={({ field }) => (
+												<FormItem className="flex-grow">
+													<FormControl>
+														<Textarea placeholder="Input Prompt" {...field} />
+													</FormControl>
+												</FormItem>
+											)}
+										/>
+										<div>
+											<Button type="button" onClick={() => remove(index)}>
+												delete
+											</Button>
+										</div>
 									</div>
-								</div>
-							);
-						})}
-					</section>
-					<Button type="submit">Submit</Button>
-				</form>
-			</Form>
+								);
+							})}
+						</section>
+						<div className="flex flex-row gap-3">
+							<Button
+								type="submit"
+								className="bg-green-700 col-span-2 h-full w-full
+      "
+							>
+								Submit
+							</Button>
+							<Button
+								type="button"
+								className="h-full w-20"
+								onClick={() => {
+									append({ theme: "" });
+								}}
+							>
+								add
+							</Button>
+						</div>
+					</form>
+				</Form>
+			</div>
 		</DrawerContent>
 	);
 };
