@@ -11,7 +11,7 @@ import { MakeAudio } from "./tool/make_audio/make_audio.js";
 import { takeScreenshot } from "./tool/take_screenshot.js";
 
 export interface WorkFlowHandler {
-	onInstruction: [instruction: InstructionEvent, sectionChanged: boolean];
+	onInstruction: [instruction: InstructionEvent];
 	onFuguoChat: [];
 }
 
@@ -20,14 +20,17 @@ export const getWorkFlowHandler = () => {
 	const thought = new Thought("配信が始まりました。");
 	const makeAudio = MakeAudio.getInstance();
 	const thinkQueue = new ThinkQueue();
+	let lastSpeak = Date.now();
+	const resetThoughtTime = 15000;
 
-	workFlowHandler.on("onInstruction", async (instruction, sectionChanged) => {
+	workFlowHandler.on("onInstruction", async (instruction) => {
 		const imageUrl = instruction.needScreenshot ? await takeScreenshot() : "";
 		const chatSession = await getLatestChatSection();
-		if (sectionChanged) {
+		const activity = new Activity(chatSession, imageUrl, instruction.type);
+		if (Date.now() - lastSpeak > resetThoughtTime) {
 			thought.beforeListen = "";
 		}
-		const activity = new Activity(chatSession, imageUrl, instruction.type);
+		lastSpeak = Date.now();
 		if (instruction.type === "talk") {
 			thought.beforeSpeak = await think("before_speak", activity, thought);
 		}
