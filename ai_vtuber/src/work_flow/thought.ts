@@ -1,29 +1,13 @@
 export class Thought {
-	private _beforeListen: string;
-	private _beforeSpeak: string;
+	public beforeListen: string;
+	public beforeSpeak: string;
 
 	constructor(beforeListen: string) {
-		this._beforeListen = beforeListen;
-		this._beforeSpeak = "";
-	}
-
-	get beforeListen() {
-		return this._beforeListen;
-	}
-
-	set beforeListen(thought: string) {
-		this._beforeListen = thought;
-	}
-
-	get beforeSpeak(): string {
-		return this._beforeSpeak;
-	}
-
-	set beforeSpeak(thought: string) {
-		this._beforeSpeak = thought;
+		this.beforeListen = beforeListen;
+		this.beforeSpeak = "";
 	}
 
 	set afterSpeak(thought: string) {
-		this._beforeListen = thought;
+		this.beforeListen = thought;
 	}
 }
