@@ -14,7 +14,8 @@ export type AgentType =
 	| "afk"
 	| "back"
 	| "after_speak"
-	| "after_call_tool";
+	| "after_call_tool"
+	| "situation";
 
 export class Agent {
 	private _name: AgentType;
@@ -42,6 +43,7 @@ export class Agent {
 			case "grade":
 			case "talk":
 			case "before_speak":
+			case "situation":
 				return undefined;
 			default:
 				throw new Error("invalid tool");
@@ -163,6 +165,17 @@ ${thought.beforeSpeak}
 ${addition}と発言した
 `;
 				break;
+
+			case "situation":
+				middlePrompt = `
+# 最初の一行目に出力するもの
+現在の会話の流れで話されていることについての要約を出力してください。
+
+# 次の二行目以降に出力するもの
+現在今プログラミングで作っている物に対しての話をしているでしょうか？
+それとも雑談をしていることが考えられるでしょうか？
+現在の会話の流れを考えて、ふぐおがプログラミングで作っている物に対しての話をしている場合は「プログラミング」、雑談をしている場合は「雑談」と出力してください。
+`;
 		}
 		const prompt = templatePrompt(
 			middlePrompt,

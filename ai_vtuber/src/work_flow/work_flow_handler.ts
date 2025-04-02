@@ -22,6 +22,8 @@ export const getWorkFlowHandler = () => {
 	const thinkQueue = new ThinkQueue();
 	let lastSpeak = Date.now();
 	const resetThoughtTime = 15000;
+	let lastProgressTime = Date.now();
+	const progressInterval = 5 * 60 * 1000;
 
 	workFlowHandler.on("onInstruction", async (instruction) => {
 		const imageUrl = instruction.needScreenshot ? await takeScreenshot() : "";
@@ -35,6 +37,7 @@ export const getWorkFlowHandler = () => {
 			thought.beforeSpeak = await think("before_speak", activity, thought);
 		}
 		if (instruction.type === "progress") {
+			lastProgressTime = Date.now();
 			makeAudio.addQueue("進捗はどうなのだ。");
 			thought.afterSpeak = await think("after_speak", activity, thought);
 			return;
@@ -55,43 +58,22 @@ export const getWorkFlowHandler = () => {
 	});
 
 	workFlowHandler.on("onFuguoChat", async () => {
-		/*
-		const chatSession = await getLatestChatSection();
-		const activity = new Activity(chatSession);
-
-		if (activity.aiIsNeedWait) {
-			return;
-		}
-
 		thinkQueue.add(async () => {
-			console.log("startProcess");
-			const [concentrate, response] = await Promise.all([
-				llmHandler("isConcentrate", activity, thought),
-				(async () => {
-					thought.beforeSpeak = await llmHandler(
-						"beforeSpeak",
-						activity,
-						thought,
-					);
-					const response = llmHandler("talk", activity, thought);
-					return response;
-				})(),
-			]);
+			if (Date.now() >= lastProgressTime + progressInterval) {
+				const chatSession = await getLatestChatSection();
+				const activity = new Activity(chatSession);
 
-			if (concentrate.startsWith("集中")) {
-				thought.afterSpeak = await llmHandler("afterSpeak", activity, thought);
-				return;
+				const situation = (await think("situation", activity, thought))
+					.split(/\r?\n/)
+					.filter((sentence) => sentence !== "");
+				console.log(situation);
+				if (situation[1] === "プログラミング") {
+					lastProgressTime = Date.now();
+					makeAudio.addQueue("進捗はどうなのだ。");
+					thought.afterSpeak = await think("after_speak", activity, thought);
+				}
 			}
-
-			makeAudio.addQueue(response);
-			thought.beforeSpeak = await llmHandler(
-				"afterSpeak",
-				activity,
-				thought,
-				response,
-			);
 		});
-    */
 	});
 
 	return workFlowHandler;
