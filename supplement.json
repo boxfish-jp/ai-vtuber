@@ -1,0 +1,115 @@
+{
+	"制作物": [
+		{
+			"name": "プログラミングサポート",
+			"category": ["ずんだもん"],
+			"description": [
+				"ずんだもんがプログラミング配信をサポートしてくれます。\n ずんだもんと雑談や相談ができるだけでなく、定期的に進捗を聞いてくれたり、PC操作や配信UIの操作を行えます。\n"
+			]
+		},
+		{
+			"name": "五目並べ",
+			"category": ["五目並べ"],
+			"description": [
+				"Coming Soon...。Akashic Engine(ニコ生ゲー)で何か作る予定。"
+			]
+		},
+		{
+			"name": "ドラクエ",
+			"category": ["ドラクエ"],
+			"description": ["Coming Soon..."]
+		},
+		{
+			"name": "ポケモン",
+			"category": ["ポケモン"],
+			"description": ["Coming Soon..."]
+		},
+		{
+			"name": "邪神ちゃんコメント読み上げ",
+			"category": ["邪神ちゃん"],
+			"description": [
+				"VoicePeak 邪神ちゃんを使い、配信のコメントを読み上げています。"
+			]
+		},
+		{
+			"name": "コマンド機能",
+			"category": ["コマンド"],
+			"description": [
+				"コメント欄から、Spotifyで曲を流す機能、曲名を表示する機能、動画を流す機能など、様々な機能を利用できます。詳しくは概要欄をご覧ください。",
+				"コメント欄で画像生成できる機能(nsfw可能)はサ終しました。"
+			]
+		},
+		{
+			"name": "あにめーに",
+			"category": ["あにめーに"],
+			"description": [
+				"ニコニコの今一番見られているアニメをランキング形式で閲覧できるサイトです。\n 再生数、マイリス数、コメント数、視聴継続率を毎日集計し、その推移をグラフ描画。",
+				" 完成して2ヶ月後にニコニコへのサイバー攻撃が起こり、復活後はニコニコ側の仕様が変わったため、現在更新は行われておりません。"
+			]
+		},
+		{
+			"name": "ランダムアニメ",
+			"category": ["ランダムアニメ"],
+			"description": [
+				"ランダムでアニメを表示するだけのサイトです。最新のアニメからいにしえのアニメまで対応しています。"
+			]
+		},
+		{
+			"name": "ギャンブルクッキークリッカー",
+			"category": ["ギャンブルクッキークリッカー"],
+			"description": [
+				"普通のクッキークリッカーにギャンブル要素を追加したニコ生ゲームです。バグが多すぎてとてもじゃないけど遊べません。リメイクする気はあります。"
+			]
+		}
+	],
+	"使用している技術": [
+		{
+			"name": "AI Tuber",
+			"category": ["AI Tuber", "ポケモン", "ずんだもん", "五目並べ"],
+			"description": [
+				"フロントもバックエンドも全て、Node.js TypeScript製です。\n 配信UIなどのフロントエンド: Vite React TailwindCSS Shadcn/ui WebSpeech API \n",
+				"バックエンド: LLM系: LangChain.js, LLM: Gemini ollama サーバー: Hono Socket.io その他: SQLite(Prisma)"
+			]
+		},
+		{
+			"name": "あにめーに",
+			"category": ["あにめーに"],
+			"description": [
+				"フロントもバックエンドも全て、Node.js TypeScript製です。\n フロントエンド: Next.js TailwindCSS Shadcn/ui (SSRを駆使した、爆速描画。)",
+				"バックエンド: Hono  Cloudflare D1  デプロイ先: Cloudflare Workers  Firebase Functions"
+			]
+		}
+	],
+	"プログラミング歴": [
+		"大学は情報系の学部だが、真面目にプログラミング勉強し始めたのは、大学2年の夏から(2022年)。掲示板アプリを作ろうと思いPHPを始め、1ヶ月でNode.jsに切り替える。",
+		"サークルでもプログラミングをしており、Node.jsの他にArduino(ESP32, M5Stack)を用いたデバイスの開発もしている。PythonやVBAを使い事務作業自動化もしたことはある。",
+		"Flutterを使ったAndroidアプリ開発や、Electronを使ったデスクトップアプリもやっている",
+		"私はニコ生プログラミング生主では一番技術力は低いと思う。私はあくまで発想力勝負！！！"
+	],
+	"開発環境": [
+		{
+			"name": "エディター",
+			"description": [
+				"NeoVim (LazyVim) AI支援:Github Copilot \n LaTeXとかMarkDownとかを書く時や今日はマウスな気分な時はVSCode"
+			]
+		},
+		{
+			"name": "ターミナル",
+			"description": [
+				"Wezterm GitBash StarShip フォントはHackGen \n ターミナルはスケスケにしないとモテないし、背景でアニメが見れるので便利。"
+			]
+		},
+		{
+			"name": "その他",
+			"description": [
+				"Gitクライアント: LazyGit, Node.jsバージョン管理: nvmWindows, Pythonバージョン管理: uv"
+			]
+		},
+		{
+			"name": "os",
+			"description": [
+				"Windows11 Node.jsが優秀すぎるので、別に仮想環境が必要ない。\n Linuxが欲しいときは手持ちのUbuntuサーバーにSSHで接続。"
+			]
+		}
+	]
+}
