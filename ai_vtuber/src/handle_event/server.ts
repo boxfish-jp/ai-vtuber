@@ -91,6 +91,8 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 		zValidator("json", workThemeSchema),
 		(c) => {
 			const data: typeof workTheme = c.req.valid("json");
+			workTheme.main = data.main;
+			workTheme.sub = data.sub;
 			ioServer.emit("work_theme", JSON.stringify(data));
 			return c.text("ok");
 		},

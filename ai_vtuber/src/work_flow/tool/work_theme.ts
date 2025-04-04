@@ -31,7 +31,9 @@ inputに作業内容を入力すると、作業内容を配信UI上の表示の�
 	action: "配信UIに表示する作業内容を反映させた。",
 };
 
-export const workTheme = {
-	main: "配信開始直後",
-	sub: ["配信開始"],
-};
+class WorkTheme {
+	public main = "配信開始直後";
+	public sub = ["配信開始"];
+}
+
+export const workTheme = new WorkTheme();
