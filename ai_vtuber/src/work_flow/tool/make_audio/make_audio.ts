@@ -26,12 +26,15 @@ export class MakeAudio {
 	async addQueue(text: string): Promise<void> {
 		const sentences = splitSentences(text);
 		for (const sentence of sentences) {
-			this._waitingQueue.push(sentence);
+			if (sentence.trim()) {
+				this._waitingQueue.push(sentence);
+			}
 		}
 	}
 
 	async start() {
 		while (true) {
+			const playedTexts: string[] = [];
 			if (this._waitingQueue.length > 0) {
 				const audioQueue: VoicevoxAudioType[] = [];
 				for (const text of this._waitingQueue) {
@@ -42,9 +45,13 @@ export class MakeAudio {
 				for (const audio of audioQueue) {
 					console.log("audio", audio.text);
 					if (!this._isInterrupt) {
+						playedTexts.push(audio.text);
 						await audio.play();
 					}
 				}
+			}
+			if (playedTexts.length) {
+				sendStreemingKit(playedTexts.join());
 			}
 			this._isInterrupt = false;
 			await sleep(1000);
@@ -58,3 +65,20 @@ export class MakeAudio {
 		}
 	}
 }
+
+const sendStreemingKit = async (content: string) => {
+	const streemingKitUrl = "http://localhost:3002";
+	const formData = new FormData();
+	formData.append("who", "bot");
+	formData.append("content", content);
+	const streemingKitResponse = await fetch(streemingKitUrl, {
+		method: "POST",
+		body: formData,
+	});
+
+	if (!streemingKitResponse.ok) {
+		console.log(
+			` Failed to post streemingKitUrl server:${streemingKitResponse.statusText}`,
+		);
+	}
+};
