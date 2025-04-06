@@ -9,25 +9,30 @@ import { gemini } from "./model.js";
 import { Thought } from "./thought.js";
 import { MakeAudio } from "./tool/make_audio/make_audio.js";
 import { takeScreenshot } from "./tool/take_screenshot.js";
+import { TalkCards } from "./tool/talk_cards.js";
 
 export interface WorkFlowHandler {
 	onInstruction: [instruction: InstructionEvent];
-	onFuguoChat: [];
+	onChat: [];
 }
 
 export const getWorkFlowHandler = () => {
 	const workFlowHandler = new EventEmitter<WorkFlowHandler>();
 	const thought = new Thought("配信が始まりました。");
 	const makeAudio = MakeAudio.getInstance();
-	const thinkQueue = new ThinkQueue();
 	const interval = {
 		resetThought: 15000,
 		progress: 5 * 60 * 1000,
+		speak: 5000,
+		bringup: 40 * 1000,
 	};
 	const lastTime = {
 		speak: Date.now(),
 		progress: Date.now(),
 	};
+	const progressQueue = new ThinkQueue(interval.speak);
+	const bringUpQueue = new ThinkQueue(interval.bringup);
+	const talkCards = new TalkCards();
 
 	workFlowHandler.on("onInstruction", async (instruction) => {
 		const imageUrl = instruction.needScreenshot ? await takeScreenshot() : "";
@@ -61,8 +66,8 @@ export const getWorkFlowHandler = () => {
 		return;
 	});
 
-	workFlowHandler.on("onFuguoChat", async () => {
-		thinkQueue.add(async () => {
+	workFlowHandler.on("onChat", async () => {
+		progressQueue.add(async () => {
 			if (Date.now() >= lastTime.progress + interval.progress) {
 				const chatSession = await getLatestChatSection();
 				const activity = new Activity(chatSession);
@@ -78,6 +83,18 @@ export const getWorkFlowHandler = () => {
 				}
 			}
 		});
+		bringUpQueue.add(async () => {
+			const card = await talkCards.getCard();
+			console.log(card);
+			if (card) {
+				makeAudio.addQueue(card);
+				thought.beforeListen = "";
+				lastTime.speak = Date.now();
+				const chatSession = await getLatestChatSection();
+				const activity = new Activity(chatSession);
+				thought.afterSpeak = await think("after_speak", activity, thought);
+			}
+		});
 	});
 
 	return workFlowHandler;
@@ -85,6 +102,10 @@ export const getWorkFlowHandler = () => {
 
 class ThinkQueue {
 	private _queue: NodeJS.Timeout[] = [];
+	private _interval: number;
+	constructor(interval: number) {
+		this._interval = interval;
+	}
 
 	add(callback: () => Promise<void>) {
 		while (this._queue.length) {
@@ -98,7 +119,7 @@ class ThinkQueue {
 				if (characterState.waiting) {
 					await callback();
 				}
-			}, 5000),
+			}, this._interval),
 		);
 	}
 }

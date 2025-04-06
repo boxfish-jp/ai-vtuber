@@ -183,9 +183,54 @@ ${addition}と発言した
 		);
 		return prompt;
 	}
+
+	static getTalkCardsPrompt(agentName: string, input = "") {
+		switch (agentName) {
+			case "requestThink":
+				return templatePrompt(
+					`
+ずんだもんの以下のキャラクターを踏まえて、ずんだもんがこれからふぐおに欲しい機能はどんな機能かを考えて下さい。できるだけ突飛な機能にしてください。また出力は端的に1文程度でお願いします。
+${characterPrompt}
+`,
+				);
+
+			case "request":
+				return templatePrompt(
+					`
+ずんだもんが以下の新しい機能を考えました。
+これをふぐおにリクエストをする発言を考えてください。
+また出力は端的に1文程度でお願いします。
+
+# ずんだもんがリクエストする新機能
+${input}
+
+# 出力する発言の例
+ふぐお、そろそろ画像生成機能を実装してほしいのだ。
+ふぐお、そろそろAmazonで好きなものを買い物できる機能を実装してほしいのだ。
+`,
+				);
+			case "daily":
+				return `ずんだもんのキャラクターになりきって、今日ずんだもんが何をしていたかをひとりごとのように報告してください。
+また出力は端的に1文程度でお願いします。
+${characterPrompt}
+`;
+			case "hobby":
+				return `ずんだもんのキャラクターになりきって、ずんだもんが最近ハマっているものについてひとりごとのように報告してください。できるだけ変わった趣味にしてください。
+また出力は端的に1文程度でお願いします。
+${characterPrompt}
+`;
+			case "futureThink":
+				return `ずんだもんのキャラクターになりきって、ずんだもんが今後したいことについてひとりごとのように報告してください。できるだけ変わった趣味にしてください。
+また出力は端的に1文程度でお願いします。
+${characterPrompt}
+`;
+			default:
+				throw new Error("invalid agent name");
+		}
+	}
 }
 
-const templatePrompt = (middlePrompt: string, chatPrompt: string) => `
+const templatePrompt = (middlePrompt: string, chatPrompt = "") => `
 ふぐおはずんだもんの友達です。
 ふぐおとずんだもんは一緒に通話をしており、その様子を配信しています。また、ふぐおはプログラミングをしています。ずんだもんはその様子を見守っています。
 
@@ -197,8 +242,13 @@ ${middlePrompt}
 - ふぐおは配信のプロなので、ずんだもんはふぐおの進行に従うことが重要です。
 - ただし、視聴者の発言は大事です。しっかり聞き入れましょう。
 
+${
+	chatPrompt
+		? `
 # 発言履歴
-${chatPrompt}
+${chatPrompt}`
+		: ""
+}
 `;
 
 const characterPrompt = `

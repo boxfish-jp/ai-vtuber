@@ -45,9 +45,7 @@ export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
 
 		await insertChatDb(chat);
 
-		if (chat.who === "fuguo") {
-			workFlow.emit("onFuguoChat");
-		}
+		workFlow.emit("onChat");
 	});
 
 	eventHandler.on("onInterrupt", () => {
