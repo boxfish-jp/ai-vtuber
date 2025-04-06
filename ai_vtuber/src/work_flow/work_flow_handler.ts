@@ -20,24 +20,28 @@ export const getWorkFlowHandler = () => {
 	const thought = new Thought("配信が始まりました。");
 	const makeAudio = MakeAudio.getInstance();
 	const thinkQueue = new ThinkQueue();
-	let lastSpeak = Date.now();
-	const resetThoughtTime = 15000;
-	let lastProgressTime = Date.now();
-	const progressInterval = 5 * 60 * 1000;
+	const interval = {
+		resetThought: 15000,
+		progress: 5 * 60 * 1000,
+	};
+	const lastTime = {
+		speak: Date.now(),
+		progress: Date.now(),
+	};
 
 	workFlowHandler.on("onInstruction", async (instruction) => {
 		const imageUrl = instruction.needScreenshot ? await takeScreenshot() : "";
 		const chatSession = await getLatestChatSection();
 		const activity = new Activity(chatSession, imageUrl, instruction.type);
-		if (Date.now() - lastSpeak > resetThoughtTime) {
+		if (Date.now() - lastTime.speak > interval.resetThought) {
 			thought.beforeListen = "";
 		}
-		lastSpeak = Date.now();
+		lastTime.speak = Date.now();
 		if (instruction.type === "talk") {
 			thought.beforeSpeak = await think("before_speak", activity, thought);
 		}
 		if (instruction.type === "progress") {
-			lastProgressTime = Date.now();
+			lastTime.progress = Date.now();
 			makeAudio.addQueue("進捗はどうなのだ。");
 			thought.afterSpeak = await think("after_speak", activity, thought);
 			return;
@@ -59,7 +63,7 @@ export const getWorkFlowHandler = () => {
 
 	workFlowHandler.on("onFuguoChat", async () => {
 		thinkQueue.add(async () => {
-			if (Date.now() >= lastProgressTime + progressInterval) {
+			if (Date.now() >= lastTime.progress + interval.progress) {
 				const chatSession = await getLatestChatSection();
 				const activity = new Activity(chatSession);
 
@@ -68,7 +72,7 @@ export const getWorkFlowHandler = () => {
 					.filter((sentence) => sentence !== "");
 				console.log(situation);
 				if (situation[1] === "プログラミング") {
-					lastProgressTime = Date.now();
+					lastTime.progress = Date.now();
 					makeAudio.addQueue("進捗はどうなのだ。");
 					thought.afterSpeak = await think("after_speak", activity, thought);
 				}
