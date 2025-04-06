@@ -1,4 +1,4 @@
-import endpointJson from "../../../../../endpoint.json";
+import endpointJson from "../../../../../endpoint.json" with { type: "json" };
 import { sleep } from "../../../lib/sleep.js";
 import { play } from "./play.js";
 

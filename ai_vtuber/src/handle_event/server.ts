@@ -6,7 +6,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { Server } from "socket.io";
 import { z } from "zod";
-import endpointJson from "../../../endpoint.json";
+import endpointJson from "../../../endpoint.json" with { type: "json" };
 import { workTheme } from "../work_flow/tool/work_theme.js";
 import type { ChatEvent, InstructionEvent } from "./event.js";
 import type { EventHandler } from "./event_handler.js";

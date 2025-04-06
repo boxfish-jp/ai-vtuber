@@ -1,7 +1,7 @@
 import { tool } from "@langchain/core/tools";
 import { hc } from "hono/client";
 import { z } from "zod";
-import endpointJson from "../../../../endpoint.json";
+import endpointJson from "../../../../endpoint.json" with { type: "json" };
 import type { restPostWorkThemeType } from "../../index.js";
 
 export const workThemeConfirm = {

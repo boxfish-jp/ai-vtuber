@@ -1,5 +1,5 @@
 import { hc } from "hono/client";
-import endpointJson from "../../../../../endpoint.json";
+import endpointJson from "../../../../../endpoint.json" with { type: "json" };
 import type { restPostChatType } from "../../../index.js";
 
 export const play = async (
