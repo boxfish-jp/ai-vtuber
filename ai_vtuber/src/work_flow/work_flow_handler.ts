@@ -22,7 +22,7 @@ export const getWorkFlowHandler = () => {
 	const makeAudio = MakeAudio.getInstance();
 	const interval = {
 		resetThought: 15000,
-		progress: 5 * 60 * 1000,
+		progress: 10 * 60 * 1000,
 		speak: 5000,
 		bringup: 40 * 1000,
 	};
