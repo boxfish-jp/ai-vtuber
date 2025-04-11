@@ -10,6 +10,7 @@ export interface EventHandler {
 	onInstruction: [instruction: InstructionEvent];
 	onChat: [chat: ChatEvent];
 	onInterrupt: [];
+	onWorkFlowState: [state: boolean];
 }
 
 export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
@@ -51,6 +52,10 @@ export const getEventHandler = (workFlow: EventEmitter<WorkFlowHandler>) => {
 	eventHandler.on("onInterrupt", () => {
 		const makeAudio = MakeAudio.getInstance();
 		makeAudio.interrupt(true);
+	});
+
+	eventHandler.on("onWorkFlowState", (state: boolean) => {
+		workFlow.emit("onChangeState", state);
 	});
 
 	return eventHandler;

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import endpointJson from "../../endpoint.json";
@@ -11,6 +11,7 @@ import {
 } from "./components/ui/drawer";
 import { FormControl, FormField, FormItem } from "./components/ui/form";
 import { Form } from "./components/ui/form";
+import { Switch } from "./components/ui/switch";
 import { Textarea } from "./components/ui/textarea";
 import { useToast } from "./hooks/use-toast";
 import type { SocketControler } from "./lib/socket";
@@ -22,6 +23,7 @@ const formSchema = z.object({
 
 export const Setting = ({ socket }: { socket: SocketControler }) => {
 	const { toast } = useToast();
+	const [workFlowState, setWorkFlowState] = useState(true);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -73,10 +75,10 @@ export const Setting = ({ socket }: { socket: SocketControler }) => {
 			<DrawerHeader>
 				<DrawerTitle>work_theme設定</DrawerTitle>
 			</DrawerHeader>
-			<div className="mb-8">
+			<div className="mb-8 mx-8">
 				<Form {...form}>
 					<form
-						className="flex flex-col gap-2 mx-8"
+						className="flex flex-col gap-2"
 						onSubmit={form.handleSubmit(onSubmit)}
 					>
 						<section>
@@ -141,6 +143,26 @@ export const Setting = ({ socket }: { socket: SocketControler }) => {
 						</div>
 					</form>
 				</Form>
+				<div className="mt-4 flex flex-row gap-3">
+					<p>AIのワークフローの状態</p>
+					<Switch
+						checked={workFlowState}
+						onCheckedChange={async (state) => {
+							setWorkFlowState(state);
+							const url = `http://${endpointJson.ai_vtuber.address}:${endpointJson.ai_vtuber.port}/workflow?state=${state}`;
+							try {
+								await fetch(url, {
+									method: "POST",
+									headers: {
+										"Content-Type": "application/json",
+									},
+								});
+							} catch (e) {
+								console.log(e);
+							}
+						}}
+					/>
+				</div>
 			</div>
 		</DrawerContent>
 	);

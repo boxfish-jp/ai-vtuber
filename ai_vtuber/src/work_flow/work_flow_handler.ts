@@ -6,6 +6,7 @@ import { getLatestChatSection } from "../handle_event/chat_db.js";
 import type { InstructionEvent } from "../handle_event/event.js";
 import { Agent, type AgentType } from "./agent.js";
 import { gemini } from "./model.js";
+import { getWorkFlowState, setWorkFlowState } from "./state.js";
 import { Thought } from "./thought.js";
 import { MakeAudio } from "./tool/make_audio/make_audio.js";
 import { takeScreenshot } from "./tool/take_screenshot.js";
@@ -14,6 +15,7 @@ import { TalkCards } from "./tool/talk_cards.js";
 export interface WorkFlowHandler {
 	onInstruction: [instruction: InstructionEvent];
 	onChat: [];
+	onChangeState: [statte: boolean];
 }
 
 export const getWorkFlowHandler = () => {
@@ -47,9 +49,6 @@ export const getWorkFlowHandler = () => {
 		}
 		if (instruction.type === "progress") {
 			lastTime.progress = Date.now();
-			makeAudio.addQueue("進捗はどうなのだ。");
-			thought.afterSpeak = await think("after_speak", activity, thought);
-			return;
 		}
 		const action = await makeAction(instruction.type, activity, thought);
 		makeAudio.addQueue(action.message);
@@ -67,34 +66,43 @@ export const getWorkFlowHandler = () => {
 	});
 
 	workFlowHandler.on("onChat", async () => {
-		progressQueue.add(async () => {
-			if (Date.now() >= lastTime.progress + interval.progress) {
-				const chatSession = await getLatestChatSection();
-				const activity = new Activity(chatSession);
+		if (getWorkFlowState()) {
+			progressQueue.add(async () => {
+				if (Date.now() >= lastTime.progress + interval.progress) {
+					const chatSession = await getLatestChatSection();
+					const activity = new Activity(chatSession);
 
-				const situation = (await think("situation", activity, thought))
-					.split(/\r?\n/)
-					.filter((sentence) => sentence !== "");
-				console.log(situation);
-				if (situation[1] === "プログラミング") {
-					lastTime.progress = Date.now();
-					makeAudio.addQueue("進捗はどうなのだ。");
+					const situation = (await think("situation", activity, thought))
+						.split(/\r?\n/)
+						.filter((sentence) => sentence !== "");
+					console.log(situation);
+					if (situation[1] === "プログラミング") {
+						lastTime.progress = Date.now();
+						makeAudio.addQueue("進捗はどうなのだ。");
+						thought.afterSpeak = await think("after_speak", activity, thought);
+					}
+				}
+			});
+			bringUpQueue.add(async () => {
+				const card = await talkCards.getCard();
+				console.log(card);
+				if (card) {
+					makeAudio.addQueue(card);
+					thought.beforeListen = "";
+					lastTime.speak = Date.now();
+					const chatSession = await getLatestChatSection();
+					const activity = new Activity(chatSession);
 					thought.afterSpeak = await think("after_speak", activity, thought);
 				}
-			}
-		});
-		bringUpQueue.add(async () => {
-			const card = await talkCards.getCard();
-			console.log(card);
-			if (card) {
-				makeAudio.addQueue(card);
-				thought.beforeListen = "";
-				lastTime.speak = Date.now();
-				const chatSession = await getLatestChatSection();
-				const activity = new Activity(chatSession);
-				thought.afterSpeak = await think("after_speak", activity, thought);
-			}
-		});
+			});
+		}
+	});
+
+	workFlowHandler.on("onChangeState", (state: boolean) => {
+		setWorkFlowState(state);
+		console.log(getWorkFlowState());
+		progressQueue.removeQueue();
+		bringUpQueue.removeQueue();
 	});
 
 	return workFlowHandler;
@@ -108,12 +116,7 @@ class ThinkQueue {
 	}
 
 	add(callback: () => Promise<void>) {
-		while (this._queue.length) {
-			const unnecessaryQueue = this._queue.shift();
-			if (unnecessaryQueue !== undefined) {
-				clearTimeout(unnecessaryQueue);
-			}
-		}
+		this.removeQueue();
 		this._queue.push(
 			setTimeout(async () => {
 				if (characterState.waiting) {
@@ -121,6 +124,15 @@ class ThinkQueue {
 				}
 			}, this._interval),
 		);
+	}
+
+	removeQueue() {
+		while (this._queue.length) {
+			const unnecessaryQueue = this._queue.shift();
+			if (unnecessaryQueue !== undefined) {
+				clearTimeout(unnecessaryQueue);
+			}
+		}
 	}
 }
 

@@ -15,7 +15,8 @@ export type AgentType =
 	| "back"
 	| "after_speak"
 	| "after_call_tool"
-	| "situation";
+	| "situation"
+	| "progress";
 
 export class Agent {
 	private _name: AgentType;
@@ -44,6 +45,7 @@ export class Agent {
 			case "talk":
 			case "before_speak":
 			case "situation":
+			case "progress":
 				return undefined;
 			default:
 				throw new Error("invalid tool");
@@ -93,11 +95,13 @@ ${addition}
 
 			case "translate":
 				return `
-以下の発言内容をずんだもんが言うとしたら、どんな発言をするでしょうか?
+以下の発言はずんだもんの頭の中で考えていたことです。
+以下の頭の中の考えをもとに、ずんだもんはどんな発言をするでしょうか?
+ずんだもんになりきって、発言をしてください。
 
 ${characterPrompt}
 
-# 発言内容
+# 頭の中の考え
 ${addition}
 `;
 
@@ -209,6 +213,7 @@ ${input}
 ふぐお、そろそろAmazonで好きなものを買い物できる機能を実装してほしいのだ。
 `,
 				);
+
 			case "daily":
 				return `ずんだもんのキャラクターになりきって、今日ずんだもんが何をしていたかをひとりごとのように報告してください。
 また出力は端的に1文程度でお願いします。
@@ -224,6 +229,15 @@ ${characterPrompt}
 また出力は端的に1文程度でお願いします。
 ${characterPrompt}
 `;
+
+			case "progress":
+				return `
+ずんだもんはふぐおの進捗を今聞きました。
+もし進捗が出ていない場合は、進捗が出ていないことを鬼のように厳しく責め立ててください。進捗が出ている場合は、褒めてください。
+発言はずんだもんのキャラクターになりきって発言してください。
+${characterPrompt}
+`;
+
 			default:
 				throw new Error("invalid agent name");
 		}

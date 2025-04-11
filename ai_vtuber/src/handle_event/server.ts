@@ -119,6 +119,12 @@ export const createServer = (eventHandler: EventEmitter<EventHandler>) => {
 		return c.text("ok");
 	});
 
+	const appWorkFlowState = app.post("/workflow", (c) => {
+		const state = c.req.query("state");
+		eventHandler.emit("onWorkFlowState", state !== "false");
+		return c.text("ok");
+	});
+
 	ioServer.on("connection", (socket) => {
 		socket.on("chat", (msg: string) => {
 			const receivedMessage: ChatEvent = chatEventSchema.parse(JSON.parse(msg));
