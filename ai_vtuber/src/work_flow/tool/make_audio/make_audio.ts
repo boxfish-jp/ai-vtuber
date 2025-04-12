@@ -50,9 +50,11 @@ export class MakeAudio {
 					}
 				}
 			}
+			/*
 			if (playedTexts.length) {
 				sendStreemingKit(playedTexts.join());
 			}
+      */
 			this._isInterrupt = false;
 			await sleep(1000);
 		}
