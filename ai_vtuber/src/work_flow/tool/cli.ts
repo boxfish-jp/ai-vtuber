@@ -58,6 +58,11 @@ start https://www.google.com/search?q=ラーメン
 ## ブルーアーカイブを開く
 \`\`\`bash
 "C:\\Program Files\\BlueStacks_nxt\\HD-Player.exe" --instance Pie64 --cmd launchAppWithBsx --package "com.YostarJP.BlueArchive" --source desktop_shortcut
+
+## hono ほの 炎のドキュメントを開く
+\`\`\`bash
+start https://hono.dev/docs/
+\`\`\`
 \`\`\`
 `,
 			schema: z.object({
@@ -65,6 +70,6 @@ start https://www.google.com/search?q=ラーメン
 			}),
 		},
 	),
-	message: "開けたのだ？",
+	message: "できたのだ？",
 	action: "CLIを操作し、ユーザーに頼まれていた操作を実行した。",
 };
