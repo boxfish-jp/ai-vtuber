@@ -5,4 +5,5 @@ export const instructions = [
 	"afk",
 	"back",
 	"grade",
+	"ask",
 ] as const;

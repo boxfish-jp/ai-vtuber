@@ -50,6 +50,10 @@ export const getWorkFlowHandler = () => {
 		if (instruction.type === "progress") {
 			lastTime.progress = Date.now();
 		}
+		if (instruction.type === "ask") {
+			makeAudio.addQueue("進捗はどうなのだ？");
+			return;
+		}
 		const action = await makeAction(instruction.type, activity, thought);
 		makeAudio.addQueue(action.message);
 		if (action.action) {
